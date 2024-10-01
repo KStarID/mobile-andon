@@ -53,7 +53,7 @@ class HomeView extends GetView<HomeController> {
         onTap: (index) {
           if (index == 1) {
             // Navigasi ke halaman asesmen
-            Get.toNamed('/asesment');
+            Get.offAllNamed('/asesment');
           }
         },
       ),

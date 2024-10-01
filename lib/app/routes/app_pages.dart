@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../modules/add_ases/add_ases_binding.dart';
+import '../modules/add_ases/add_ases_view.dart';
 import '../modules/asesment/asesment_binding.dart';
 import '../modules/asesment/asesment_view.dart';
 import '../modules/home/home_binding.dart';
@@ -29,6 +31,11 @@ class AppPages {
       name: _Paths.ASESMENT,
       page: () => AsesmentView(),
       binding: AsesmentBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADD_ASES,
+      page: () => const AddAsesView(),
+      binding: AddAsesBinding(),
     ),
   ];
 }

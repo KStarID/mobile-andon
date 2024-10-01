@@ -1,79 +1,163 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../data/models/assessment_model.dart';
+import 'asesment_controller.dart';
 
-class AsesmentView extends StatelessWidget {
+class AsesmentView extends GetView<AsesmentController> {
+  const AsesmentView({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Asesmen'),
+        title: const Text('Asesmen'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              // Implementasi logika logout di sini
+              // Contoh: Get.offAllNamed('/login');
+            },
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          columns: [
-            DataColumn(label: Text('No.')),
-            DataColumn(label: Text('Updated Time')),
-            DataColumn(label: Text('Area')),
-            DataColumn(label: Text('Sub Area')),
-            DataColumn(label: Text('SOP Number')),
-            DataColumn(label: Text('Model')),
-            DataColumn(label: Text('Mesin Code Asset')),
-            DataColumn(label: Text('Machine Name')),
-            DataColumn(label: Text('Status')),
-            DataColumn(label: Text('Details')),
-          ],
-          rows: List<DataRow>.generate(
-            10, // Ganti dengan jumlah baris yang sesuai
-            (index) => DataRow(
-              cells: [
-                DataCell(Text('${index + 1}')),
-                DataCell(Text('2023-05-${index + 1} 10:00')),
-                DataCell(Text('Area ${index + 1}')),
-                DataCell(Text('Sub Area ${index + 1}')),
-                DataCell(Text('SOP-${index + 100}')),
-                DataCell(Text('Model ${index + 1}')),
-                DataCell(Text('MC-${index + 1000}')),
-                DataCell(Text('Machine ${index + 1}')),
-                DataCell(Text('Active')),
-                DataCell(
-                  IconButton(
-                    icon: Icon(Icons.info_outline),
-                    onPressed: () => _showDetailsOverlay(context, index),
-                  ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              onChanged: controller.search,
+              decoration: InputDecoration(
+                labelText: 'Cari',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Obx(() => DataTable(
+                sortColumnIndex: controller.sortColumnIndex.value,
+                sortAscending: controller.isAscending.value,
+                columns: [
+                  DataColumn(
+                    label: const Text('No.'),
+                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                  ),
+                  DataColumn(
+                    label: const Text('Waktu Update'),
+                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                  ),
+                  DataColumn(
+                    label: const Text('Area'),
+                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                  ),
+                  DataColumn(
+                    label: const Text('Sub Area'),
+                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                  ),
+                  DataColumn(
+                    label: const Text('Nomor SOP'),
+                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                  ),
+                  DataColumn(
+                    label: const Text('Model'),
+                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                  ),
+                  DataColumn(
+                    label: const Text('Kode Aset Mesin'),
+                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                  ),
+                  DataColumn(
+                    label: const Text('Nama Mesin'),
+                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                  ),
+                  DataColumn(
+                    label: const Text('Status'),
+                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                  ),
+                  const DataColumn(label: Text('Detail')),
+                ],
+                rows: controller.filteredAssessments.map((assessment) => DataRow(
+                  cells: [
+                    DataCell(Text(assessment.no.toString())),
+                    DataCell(Text(assessment.updatedTime)),
+                    DataCell(Text(assessment.area)),
+                    DataCell(Text(assessment.subArea)),
+                    DataCell(Text(assessment.sopNumber)),
+                    DataCell(Text(assessment.model)),
+                    DataCell(Text(assessment.machineCodeAsset)),
+                    DataCell(Text(assessment.machineName)),
+                    DataCell(Text(assessment.status)),
+                    DataCell(
+                      IconButton(
+                        icon: const Icon(Icons.info_outline),
+                        onPressed: () => _showDetailsOverlay(context, assessment),
+                      ),
+                    ),
+                  ],
+                )).toList(),
+              )),
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Get.toNamed('/add-ases'),
+        child: const Icon(Icons.add),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 1,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.assessment),
+            label: 'Asesmen',
+          ),
+        ],
+        onTap: (index) {
+          if (index == 0) {
+            Get.offAllNamed('/home');
+          }
+        },
       ),
     );
   }
 
-  void _showDetailsOverlay(BuildContext context, int index) {
+  void _showDetailsOverlay(BuildContext context, Assessment assessment) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Detail Asesmen'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('No: ${index + 1}'),
-              Text('Updated Time: 2023-05-${index + 1} 10:00'),
-              Text('Area: Area ${index + 1}'),
-              Text('Sub Area: Sub Area ${index + 1}'),
-              Text('SOP Number: SOP-${index + 100}'),
-              Text('Model: Model ${index + 1}'),
-              Text('Mesin Code Asset: MC-${index + 1000}'),
-              Text('Machine Name: Machine ${index + 1}'),
-              Text('Status: Active'),
-              // Tambahkan informasi detail lainnya di sini
-            ],
+          title: const Text('Detail Asesmen'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('No: ${assessment.no}'),
+                Text('Waktu Update: ${assessment.updatedTime}'),
+                Text('Area: ${assessment.area}'),
+                Text('Sub Area: ${assessment.subArea}'),
+                Text('Nomor SOP: ${assessment.sopNumber}'),
+                Text('Model: ${assessment.model}'),
+                Text('Kode Aset Mesin: ${assessment.machineCodeAsset}'),
+                Text('Nama Mesin: ${assessment.machineName}'),
+                Text('Status: ${assessment.status}'),
+                Text('Detail: ${assessment.details}'),
+              ],
+            ),
           ),
           actions: [
             TextButton(
-              child: Text('Tutup'),
+              child: const Text('Tutup'),
               onPressed: () {
                 Navigator.of(context).pop();
               },

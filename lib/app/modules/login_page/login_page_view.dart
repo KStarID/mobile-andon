@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:testcli/app/modules/login_page/login_page_controller.dart';
 
-import '../home/home_view.dart';
-
-
 class LoginPage extends GetView<LoginController> {
   const LoginPage({Key? key}) : super(key: key);
 

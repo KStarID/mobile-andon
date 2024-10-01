@@ -38,6 +38,7 @@ dependencies:
   get: ^4.6.6
   fl_chart: ^0.69.0
   syncfusion_flutter_charts: ^27.1.51
+  qr_code_scanner: ^1.0.1
 
 dev_dependencies:
   flutter_test:
