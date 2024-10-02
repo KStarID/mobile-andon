@@ -8,6 +8,8 @@ import '../modules/home/home_binding.dart';
 import '../modules/home/home_view.dart';
 import '../modules/login_page/login_page_binding.dart';
 import '../modules/login_page/login_page_view.dart';
+import '../modules/qr_scan/qr_scan_binding.dart';
+import '../modules/qr_scan/qr_scan_view.dart';
 
 part 'app_routes.dart';
 
@@ -36,6 +38,11 @@ class AppPages {
       name: _Paths.ADD_ASES,
       page: () => const AddAsesView(),
       binding: AddAsesBinding(),
+    ),
+    GetPage(
+      name: _Paths.QR_SCAN,
+      page: () => const QRScannerView(),
+      binding: QrScanBinding(),
     ),
   ];
 }

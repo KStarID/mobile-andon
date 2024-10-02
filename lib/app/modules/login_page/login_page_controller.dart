@@ -4,14 +4,18 @@ import 'package:get/get.dart';
 class LoginController extends GetxController {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
+  final isPasswordHidden = true.obs;
+
+  void togglePasswordVisibility() {
+    isPasswordHidden.value = !isPasswordHidden.value;
+  }
 
   void login() {
     // Implementasi logika login di sini
-    // Misalnya, verifikasi kredensial dan hubungkan ke MQTT
     print('Username: ${usernameController.text}');
     print('Password: ${passwordController.text}');
-    // Jika login berhasil, arahkan ke halaman utama
-    // Get.offAllNamed(Routes.HOME);
+    // Contoh: navigasi ke halaman utama setelah login berhasil
+    Get.offAllNamed('/home');
   }
 
   @override

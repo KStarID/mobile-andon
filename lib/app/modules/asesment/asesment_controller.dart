@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:testcli/app/data/models/assessment_model.dart';
 
@@ -8,12 +9,24 @@ class AsesmentController extends GetxController {
   final sortColumnIndex = 0.obs;
   final isAscending = true.obs;
 
+  Assessment? findAssessmentByQRCode(String qrCode) {
+    try {
+      return filteredAssessments.firstWhereOrNull((assessment) => assessment.machineCodeAsset == qrCode);
+    } catch (e) {
+      print('Error dalam findAssessmentByQRCode: $e');
+      return null;
+    }
+  }
+
   @override
+
   void onInit() {
     super.onInit();
     // Inisialisasi data dummy
-    assessments.addAll([
-      Assessment(no: 1, updatedTime: '2023-06-01', area: 'Area A', subArea: 'Sub A', sopNumber: 'SOP001', model: 'Model X', machineCodeAsset: 'MC001', machineName: 'Machine 1', status: 'Active', details: 'Detail 1'),
+    try {
+      
+        assessments.addAll([
+          Assessment(no: 1, updatedTime: '2023-06-01', area: 'Area A', subArea: 'Sub A', sopNumber: 'SOP001', model: 'Model X', machineCodeAsset: 'MC001', machineName: 'Machine 1', status: 'Active', details: 'Detail 1'),
       Assessment(no: 2, updatedTime: '2023-06-02', area: 'Area B', subArea: 'Sub B', sopNumber: 'SOP002', model: 'Model Y', machineCodeAsset: 'MC002', machineName: 'Machine 2', status: 'Inactive', details: 'Detail 2'),
       Assessment(no: 3, updatedTime: '2023-06-03', area: 'Area C', subArea: 'Sub C', sopNumber: 'SOP003', model: 'Model Z', machineCodeAsset: 'MC003', machineName: 'Machine 3', status: 'Inactive', details: 'Detail 3'),
       Assessment(no: 4, updatedTime: '2023-06-04', area: 'Area D', subArea: 'Sub D', sopNumber: 'SOP004', model: 'Model C', machineCodeAsset: 'MC004', machineName: 'Machine 4', status: 'Active', details: 'Detail 4'),
@@ -21,6 +34,14 @@ class AsesmentController extends GetxController {
       // Tambahkan data dummy lainnya...
     ]);
     filteredAssessments.addAll(assessments);
+    if (kDebugMode) {
+      print('assessments successfully added');
+    }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error adding assessments: $e');
+      }
+    }
   }
 
   void addAssessment(Assessment assessment) {

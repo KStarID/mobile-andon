@@ -4,7 +4,7 @@ import '../../data/models/assessment_model.dart';
 import 'asesment_controller.dart';
 
 class AsesmentView extends GetView<AsesmentController> {
-  const AsesmentView({Key? key}) : super(key: key);
+  const AsesmentView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class AsesmentView extends GetView<AsesmentController> {
             icon: const Icon(Icons.logout),
             onPressed: () {
               // Implementasi logika logout di sini
-              // Contoh: Get.offAllNamed('/login');
+              Get.offAllNamed('/login-page');
             },
           ),
         ],
@@ -106,10 +106,23 @@ class AsesmentView extends GetView<AsesmentController> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed('/add-ases'),
-        child: const Icon(Icons.add),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: 'add-ases',
+            onPressed: () => Get.toNamed('/add-ases'),
+          child: const Icon(Icons.add),
+          ),
+          SizedBox(height: 16),
+          FloatingActionButton(
+            heroTag: 'qr-scanner',
+          onPressed: () => Get.toNamed('/qr-scan'),
+          child: const Icon(Icons.qr_code_scanner),
+          ),
+        ],
       ),
+      
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1,
         items: const [

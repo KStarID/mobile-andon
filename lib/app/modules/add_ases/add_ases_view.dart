@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'add_ases_controller.dart';
 
 class AddAsesView extends GetView<AddAsesController> {
-  const AddAsesView({Key? key}) : super(key: key);
+  const AddAsesView({super.key});
 
   @override
   Widget build(BuildContext context) {

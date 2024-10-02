@@ -38,7 +38,7 @@ dependencies:
   get: ^4.6.6
   fl_chart: ^0.69.0
   syncfusion_flutter_charts: ^27.1.51
-  qr_code_scanner: ^1.0.1
+  mobile_scanner: ^5.2.3
 
 dev_dependencies:
   flutter_test:
@@ -61,6 +61,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/logos/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

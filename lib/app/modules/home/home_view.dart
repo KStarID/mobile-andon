@@ -4,7 +4,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
-  const HomeView({Key? key}) : super(key: key);
+  const HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class HomeView extends GetView<HomeController> {
             icon: const Icon(Icons.logout),
             onPressed: () {
               // Implementasi logika logout di sini
-              // Contoh: Get.offAllNamed('/login');
+              Get.offAllNamed('/login-page');
             },
           ),
         ],
