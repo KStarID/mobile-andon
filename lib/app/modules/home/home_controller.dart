@@ -9,19 +9,20 @@ class HomeController extends GetxController {
   List<ChartData> getDowntimeData() {
     // Implementasi logika untuk mendapatkan data downtime/ok
     return [
-      ChartData('OK', 70),
-      ChartData('Downtime', 30),
+      ChartData('Day 1', 20),
+      ChartData('Day 2', 30),
+      ChartData('Day 3', 10),
+      ChartData('Day 4', 20),
+      ChartData('Day 5', 30),
     ];
   }
 
   List<ChartData> getMachineStatusData() {
     // Implementasi logika untuk mendapatkan data status mesin
     return [
-      ChartData('M1', 8),
-      ChartData('M2', 10),
-      ChartData('M3', 14),
-      ChartData('M4', 15),
-      ChartData('M5', 13),
+      ChartData('OK', 70),
+      ChartData('NG', 20),
+      ChartData('Repairing', 10),
     ];
   }
 
@@ -65,6 +66,7 @@ class HomeController extends GetxController {
   void updateMTTRMonth(DateTime newMonth) {
     mttrMonth.value = newMonth;
     // Perbarui data MTTR berdasarkan bulan baru
+    
   }
 }
 
@@ -73,3 +75,4 @@ class ChartData {
   final String x;
   final double y;
 }
+

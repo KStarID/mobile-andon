@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../data/models/assessment_model.dart';
 import 'asesment_controller.dart';
 
 class AsesmentView extends GetView<AsesmentController> {
@@ -10,101 +9,124 @@ class AsesmentView extends GetView<AsesmentController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Asesmen'),
+        title: const Text('Assessment'),
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: () => _showFilterDialog(context),
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
               // Implementasi logika logout di sini
-              Get.offAllNamed('/login-page');
+              Get.offAllNamed('/splash-screen');
             },
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              onChanged: controller.search,
-              decoration: InputDecoration(
-                labelText: 'Cari',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+      body: FutureBuilder(
+        future: Future.delayed(Duration(seconds: 1)),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+              ),
+            );
+          }
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  onChanged: controller.search,
+                  decoration: InputDecoration(
+                    labelText: 'Cari',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Obx(() => DataTable(
-                sortColumnIndex: controller.sortColumnIndex.value,
-                sortAscending: controller.isAscending.value,
-                columns: [
-                  DataColumn(
-                    label: const Text('No.'),
-                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                  ),
-                  DataColumn(
-                    label: const Text('Waktu Update'),
-                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                  ),
-                  DataColumn(
-                    label: const Text('Area'),
-                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                  ),
-                  DataColumn(
-                    label: const Text('Sub Area'),
-                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                  ),
-                  DataColumn(
-                    label: const Text('Nomor SOP'),
-                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                  ),
-                  DataColumn(
-                    label: const Text('Model'),
-                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                  ),
-                  DataColumn(
-                    label: const Text('Kode Aset Mesin'),
-                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                  ),
-                  DataColumn(
-                    label: const Text('Nama Mesin'),
-                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                  ),
-                  DataColumn(
-                    label: const Text('Status'),
-                    onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                  ),
-                  const DataColumn(label: Text('Detail')),
-                ],
-                rows: controller.filteredAssessments.map((assessment) => DataRow(
-                  cells: [
-                    DataCell(Text(assessment.no.toString())),
-                    DataCell(Text(assessment.updatedTime)),
-                    DataCell(Text(assessment.area)),
-                    DataCell(Text(assessment.subArea)),
-                    DataCell(Text(assessment.sopNumber)),
-                    DataCell(Text(assessment.model)),
-                    DataCell(Text(assessment.machineCodeAsset)),
-                    DataCell(Text(assessment.machineName)),
-                    DataCell(Text(assessment.status)),
-                    DataCell(
-                      IconButton(
-                        icon: const Icon(Icons.info_outline),
-                        onPressed: () => _showDetailsOverlay(context, assessment),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Obx(() => DataTable(
+                    sortColumnIndex: controller.sortColumnIndex.value,
+                    sortAscending: controller.isAscending.value,
+                    columns: [
+                      DataColumn(
+                        label: const Text('No.'),
+                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
                       ),
-                    ),
-                  ],
-                )).toList(),
-              )),
-            ),
-          ),
-        ],
+                      DataColumn(
+                        label: const Text('Shift'),
+                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                      ),
+                      DataColumn(
+                        label: const Text('Updated Time'),
+                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                      ),
+                      DataColumn(
+                        label: const Text('Area'),
+                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                      ),
+                      DataColumn(
+                        label: const Text('Sub Area'),
+                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                      ),
+                      DataColumn(
+                        label: const Text('SOP Number'),
+                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                      ),
+                      DataColumn(
+                        label: const Text('Models'),
+                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                      ),
+                      DataColumn(
+                        label: const Text('Code Asset'),
+                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                      ),
+                      DataColumn(
+                        label: const Text('Machine Name'),
+                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                      ),
+                      DataColumn(
+                        label: const Text('Status'),
+                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
+                      ),
+                      const DataColumn(label: Text('Details')),
+                    ],
+                    rows: controller.filteredAssessments.map((assessment) => DataRow(
+                      cells: [
+                        DataCell(Text(assessment.no.toString())),
+                        DataCell(Text(assessment.shift)),
+                        DataCell(Text(assessment.updatedTime)),
+                        DataCell(Text(assessment.area)),
+                        DataCell(Text(assessment.subArea)),
+                        DataCell(Text(assessment.sopNumber)),
+                        DataCell(Text(assessment.model)),
+                        DataCell(Text(assessment.machineCodeAsset)),
+                        DataCell(Text(assessment.machineName)),
+                        DataCell(Text(assessment.status)),
+                        DataCell(
+                          IconButton(
+                            icon: const Icon(Icons.info_outline),
+                            onPressed: () {
+                            Get.toNamed('/detail-history');
+                            },
+                          ),
+                        ),
+                      ],
+                    )).toList(),
+                  )),
+                ),
+              ),
+            ],
+          );
+        },
       ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -132,7 +154,7 @@ class AsesmentView extends GetView<AsesmentController> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.assessment),
-            label: 'Asesmen',
+            label: 'Assesmen',
           ),
         ],
         onTap: (index) {
@@ -143,39 +165,68 @@ class AsesmentView extends GetView<AsesmentController> {
       ),
     );
   }
-
-  void _showDetailsOverlay(BuildContext context, Assessment assessment) {
+  void _showFilterDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Detail Asesmen'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('No: ${assessment.no}'),
-                Text('Waktu Update: ${assessment.updatedTime}'),
-                Text('Area: ${assessment.area}'),
-                Text('Sub Area: ${assessment.subArea}'),
-                Text('Nomor SOP: ${assessment.sopNumber}'),
-                Text('Model: ${assessment.model}'),
-                Text('Kode Aset Mesin: ${assessment.machineCodeAsset}'),
-                Text('Nama Mesin: ${assessment.machineName}'),
-                Text('Status: ${assessment.status}'),
-                Text('Detail: ${assessment.details}'),
-              ],
-            ),
+          title: Text('Filter'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                child: Text('Filter by Date'),
+                onPressed: () async {
+                  final DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: controller.selectedDate.value ?? DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2025),
+                  );
+                  if (picked != null) {
+                    controller.filterByDate(picked);
+                  }
+                },
+              ),
+              ElevatedButton(
+                child: Text('Filter by Month'),
+                onPressed: () async {
+                  final DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: controller.selectedMonth.value ?? DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2025),
+                  );
+                  if (picked != null) {
+                    controller.filterByMonth(DateTime(picked.year, picked.month));
+                  }
+                },
+              ),
+              ElevatedButton(
+                child: Text('Filter by Year'),
+                onPressed: () async {
+                  final DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: controller.selectedYear.value ?? DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2025),
+                  );
+                  if (picked != null) {
+                    controller.filterByYear(DateTime(picked.year));
+                  }
+                },
+              ),
+              ElevatedButton(
+                child: Text('Clear Filters'),
+                onPressed: () {
+                  controller.filterByDate(null);
+                  controller.filterByMonth(null);
+                  controller.filterByYear(null);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              child: const Text('Tutup'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
         );
       },
     );

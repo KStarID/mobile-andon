@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'login_page_controller.dart';
 
 class LoginPage extends GetView<LoginController> {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,8 +14,8 @@ class LoginPage extends GetView<LoginController> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFECFFF4),
-              Color(0xFFD2FFE8),
+              Color(0xFFD6FFEA),
+              Color(0xFFADFFD5),
             ],
           ),
         ),
@@ -27,14 +27,9 @@ class LoginPage extends GetView<LoginController> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset(
-                    'assets/logos/logo_oppo.png',
-                    width: 150,
-                    height: 150,
-                  ),
-                  Image.asset(
-                    'assets/logos/oppo_mascot.png',
-                    width: 850,
-                    height: 400,
+                    'assets/logos/oppo-mascott.png', // Ganti dengan nama file logo Anda
+                    width: 800,
+                    height: 600,
                   ),
                   const SizedBox(height: 48),
                   TextField(
@@ -66,6 +61,7 @@ class LoginPage extends GetView<LoginController> {
                           controller.isPasswordHidden.value
                               ? Icons.visibility_off
                               : Icons.visibility,
+                          color: Color(0xFF00BD5B),
                         ),
                         onPressed: controller.togglePasswordVisibility,
                       ),
@@ -75,7 +71,7 @@ class LoginPage extends GetView<LoginController> {
                   ElevatedButton(
                     onPressed: controller.login,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF00D04F),
+                      backgroundColor: Color(0xFF006B33),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -86,7 +82,7 @@ class LoginPage extends GetView<LoginController> {
                     ),
                     child: Text(
                       'Login',
-                      style: TextStyle(fontSize: 18),
+                      style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
                 ],

@@ -1,9 +1,11 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:testcli/app/data/models/assessment_model.dart';
-import 'package:testcli/app/modules/asesment/asesment_controller.dart';
+
+import '../../data/models/assessment_model.dart';
+import '../asesment/asesment_controller.dart';
 
 class AddAsesController extends GetxController {
+  final shiftController = TextEditingController();
   final areaController = TextEditingController();
   final subAreaController = TextEditingController();
   final sopNumberController = TextEditingController();
@@ -14,7 +16,8 @@ class AddAsesController extends GetxController {
   final detailsController = TextEditingController();
 
   void addAssessment() {
-    if (areaController.text.isNotEmpty &&
+    if (shiftController.text.isNotEmpty &&
+        areaController.text.isNotEmpty &&
         subAreaController.text.isNotEmpty &&
         sopNumberController.text.isNotEmpty &&
         modelController.text.isNotEmpty &&
@@ -25,6 +28,7 @@ class AddAsesController extends GetxController {
       final newAssessment = Assessment(
         no: Get.find<AsesmentController>().assessments.length + 1,
         updatedTime: DateTime.now().toString(),
+        shift: shiftController.text,
         area: areaController.text,
         subArea: subAreaController.text,
         sopNumber: sopNumberController.text,
@@ -39,6 +43,7 @@ class AddAsesController extends GetxController {
       Get.find<AsesmentController>().addAssessment(newAssessment);
 
       // Bersihkan form
+      shiftController.clear();
       areaController.clear();
       subAreaController.clear();
       sopNumberController.clear();
@@ -57,6 +62,7 @@ class AddAsesController extends GetxController {
 
   @override
   void onClose() {
+    shiftController.dispose();
     areaController.dispose();
     subAreaController.dispose();
     sopNumberController.dispose();

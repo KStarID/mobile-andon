@@ -9,7 +9,7 @@ class AddAsesView extends GetView<AddAsesController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Asesmen'),
+        title: const Text('Add Assessment'),
         centerTitle: true,
       ),
       body: Padding(
@@ -17,6 +17,21 @@ class AddAsesView extends GetView<AddAsesController> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              DropdownButtonFormField<String>(
+                value: controller.shiftController.text.isEmpty ? null : controller.shiftController.text,
+                decoration: const InputDecoration(labelText: 'Shift'),
+                items: ['Day', 'Night'].map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    controller.shiftController.text = newValue;
+                  }
+                },
+              ),
               TextField(
                 controller: controller.areaController,
                 decoration: const InputDecoration(labelText: 'Area'),
@@ -53,7 +68,7 @@ class AddAsesView extends GetView<AddAsesController> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: controller.addAssessment,
-                child: const Text('Tambah Asesmen'),
+                child: const Text('Add Assessment'),
               ),
             ],
           ),

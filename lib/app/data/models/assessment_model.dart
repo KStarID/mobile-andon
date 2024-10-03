@@ -1,5 +1,6 @@
 class Assessment {
   final int no;
+  final String shift;
   final String updatedTime;
   final String area;
   final String subArea;
@@ -12,6 +13,7 @@ class Assessment {
 
   Assessment({
     required this.no,
+    required this.shift,
     required this.updatedTime,
     required this.area,
     required this.subArea,
@@ -25,6 +27,7 @@ class Assessment {
 
   factory Assessment.fromJson(Map<String, dynamic> json) => Assessment(
         no: json['id'],
+        shift: json['shift'],
         updatedTime: json['updatedTime'],
         area: json['area'],
         subArea: json['subArea'],
@@ -38,6 +41,7 @@ class Assessment {
 
   Map<String, dynamic> toJson() => {
         'number': no,
+        'shift': shift,
         'updatedTime': updatedTime,
         'area': area,
         'subArea': subArea,

@@ -17,27 +17,38 @@ class HomeView extends GetView<HomeController> {
             icon: const Icon(Icons.logout),
             onPressed: () {
               // Implementasi logika logout di sini
-              Get.offAllNamed('/login-page');
+              Get.offAllNamed('/splash-screen');
             },
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              _buildChartCard('Downtime/OK', _buildPieChart(), controller.downtimeMonth),
-              const SizedBox(height: 16),
-              _buildChartCard('Machine Status', _buildBarChart(), controller.machineStatusMonth),
-              const SizedBox(height: 16),
-              _buildChartCard('MTBF', _buildLineChart(controller.getMTBFData()), controller.mtbfMonth),
-              const SizedBox(height: 16),
-              _buildChartCard('MTTR', _buildLineChart(controller.getMTTRData()), controller.mttrMonth),
-            ],
+      body: FutureBuilder(
+        future: Future.delayed(Duration(seconds: 2)),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+              ),
+            );
+          }
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                _buildChartCard('Downtime/OK', _buildLineChart(controller.getDowntimeData()), controller.downtimeMonth),
+                const SizedBox(height: 16),
+                _buildChartCard('Machine Status', _buildPieChart(), controller.machineStatusMonth),
+                const SizedBox(height: 16),
+                _buildChartCard('MTBF', _buildLineChart(controller.getMTBFData()), controller.mtbfMonth),
+                const SizedBox(height: 16),
+                _buildChartCard('MTTR', _buildLineChart(controller.getMTTRData()), controller.mttrMonth),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      }),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 0, // Indeks untuk halaman home
         items: const [
@@ -47,7 +58,7 @@ class HomeView extends GetView<HomeController> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.assessment),
-            label: 'Asesmen',
+            label: 'Assessment',
           ),
         ],
         onTap: (index) {
@@ -117,22 +128,15 @@ class HomeView extends GetView<HomeController> {
     return SfCircularChart(
       series: <CircularSeries>[
         PieSeries<ChartData, String>(
-          dataSource: controller.getDowntimeData(),
-          xValueMapper: (ChartData data, _) => data.x,
-          yValueMapper: (ChartData data, _) => data.y,
-        )
-      ],
-    );
-  }
-
-  Widget _buildBarChart() {
-    return SfCartesianChart(
-      primaryXAxis: CategoryAxis(),
-      series: <CartesianSeries>[
-        ColumnSeries<ChartData, String>(
           dataSource: controller.getMachineStatusData(),
           xValueMapper: (ChartData data, _) => data.x,
           yValueMapper: (ChartData data, _) => data.y,
+          dataLabelSettings: DataLabelSettings(
+            isVisible: true,
+            labelPosition: ChartDataLabelPosition.outside,
+            textStyle: TextStyle(fontSize: 20),
+          ),
+          dataLabelMapper: (ChartData data, _) => '${data.x}: ${data.y}%',
         )
       ],
     );
