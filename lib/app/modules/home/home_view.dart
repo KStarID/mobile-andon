@@ -10,17 +10,24 @@ class HomeView extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              // Implementasi logika logout di sini
-              Get.offAllNamed('/splash-screen');
-            },
-          ),
-        ],
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Hello, ${controller.username.value ?? "User"}'),
+            Expanded(
+              child: Center(
+                child: Text('Dashboard'),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () {
+                // Implementasi logika logout di sini
+                Get.offAllNamed('/splash-screen');
+              },
+            ),
+          ],
+        ),
       ),
       body: FutureBuilder(
         future: Future.delayed(Duration(seconds: 2)),

@@ -39,7 +39,8 @@ dependencies:
   fl_chart: ^0.69.0
   syncfusion_flutter_charts: ^27.1.51
   mobile_scanner: ^5.2.3
-
+  http: ^1.2.2
+  shared_preferences: ^2.2.3
 dev_dependencies:
   flutter_test:
     sdk: flutter

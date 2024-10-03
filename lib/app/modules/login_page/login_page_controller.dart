@@ -1,27 +1,47 @@
-import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
+import '../../services/service.dart';
+import '../../services/user_service.dart';
 
 class LoginController extends GetxController {
-  final usernameController = TextEditingController();
-  final passwordController = TextEditingController();
+  final AuthService _authService = Get.find<AuthService>();
+  final UserService _userService = Get.find<UserService>();
+  
+  final username = ''.obs;
+  final password = ''.obs;
+  final role = 'admin'.obs;
   final isPasswordHidden = true.obs;
+  final isLoading = false.obs;
 
   void togglePasswordVisibility() {
     isPasswordHidden.value = !isPasswordHidden.value;
   }
 
-  void login() {
-    // Implementasi logika login di sini
-    print('Username: ${usernameController.text}');
-    print('Password: ${passwordController.text}');
-    // Contoh: navigasi ke halaman utama setelah login berhasil
-    Get.offAllNamed('/home');
-  }
+  Future<void> login() async {
+    if (username.value.isEmpty || password.value.isEmpty) {
+      Get.snackbar('Error', 'Please enter username and password');
+      return;
+    }
 
-  @override
-  void onClose() {
-    usernameController.dispose();
-    passwordController.dispose();
-    super.onClose();
+    isLoading.value = true;
+    try {
+      final response = await _authService.login(
+        username.value,
+        password.value,
+        role.value, 
+      );
+      
+      // Simpan username
+      _userService.setUsername(username.value);
+      // Proses response di sini
+      print(response);
+      
+      // Jika login berhasil, arahkan ke halaman utama
+      Get.offAllNamed('/home');
+    } catch (e) {
+      Get.snackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

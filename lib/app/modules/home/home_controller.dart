@@ -1,10 +1,21 @@
 import 'package:get/get.dart';
 
+import '../../services/user_service.dart';
+
 class HomeController extends GetxController {
+  final UserService _userService = Get.find<UserService>();
+  final username = Rx<String?>('');
+
   final downtimeMonth = DateTime.now().obs;
   final machineStatusMonth = DateTime.now().obs;
   final mtbfMonth = DateTime.now().obs;
   final mttrMonth = DateTime.now().obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    username.value = _userService.getUsername();
+  }
 
   List<ChartData> getDowntimeData() {
     // Implementasi logika untuk mendapatkan data downtime/ok
