@@ -34,20 +34,17 @@ class ApiService {
 
   Future<List<Assessment>> getAssessments() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/assessments'),
-        headers: {'Content-Type': 'application/json'},
-      );
-      
+      final response = await http.get(Uri.parse('$baseUrl/assessments'));
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
         if (jsonResponse['success'] == true) {
           final List<dynamic> assessmentDataNested = jsonResponse['data'];
           if (assessmentDataNested.isNotEmpty && assessmentDataNested[0] is List) {
             final List<dynamic> assessmentData = assessmentDataNested[0];
+            print('Number of assessments from API: ${assessmentData.length}');
             return assessmentData.map((data) => Assessment.fromJson(data)).toList();
           } else {
             throw Exception('Unexpected data structure in API response');

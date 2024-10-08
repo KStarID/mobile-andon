@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../data/models/assessment_model.dart';
 import '../../services/service.dart';
+import '../../services/user_service.dart';
 import '../asesment/asesment_controller.dart';
 
 class UpdateAsesController extends GetxController {
@@ -110,6 +111,7 @@ class UpdateAsesController extends GetxController {
     if (formKey.currentState!.validate()) {
       try {
         final updatedAssessmentData = {
+          'userId': Get.find<UserService>().getUserId() ?? 0,
           'shift': selectedShift.value!.toLowerCase(),
           'sop_number': sopNumberController.text,
           'subAreaId': selectedSubArea.value!.id,
@@ -119,9 +121,7 @@ class UpdateAsesController extends GetxController {
           'notes': detailsController.text,
           'assessmentDate': DateTime.now().toIso8601String(),
         };
-
-        final updatedAssessment = await _apiService.updateAssessment(assessment.value!.id, updatedAssessmentData);
-        Get.find<AsesmentController>().updateAssessmentList(updatedAssessment);
+        await Get.find<AsesmentController>().addAssessment(updatedAssessmentData);
         Get.back();
         Get.snackbar('Success', 'Assessment updated successfully');
       } catch (e) {

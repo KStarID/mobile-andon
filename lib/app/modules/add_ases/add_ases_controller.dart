@@ -4,6 +4,7 @@ import 'package:get_storage/get_storage.dart';
 
 import '../../data/models/assessment_model.dart';
 import '../../routes/app_pages.dart';
+import '../../services/user_service.dart';
 import '../asesment/asesment_controller.dart';
 import '../../services/service.dart';
 
@@ -29,17 +30,15 @@ class AddAsesController extends GetxController {
   // Tambahkan ini
   final machineName = ''.obs;
   final machineStatus = Rx<String?>(null);
-  final machineStatusOptions = ['ok', 'repairing', 'breakdown'];
+  final machineStatusOptions = ['ok', 'ng', 'repairing'];
 
   @override
   void onInit() {
     super.onInit();
-    fetchSubAreas();
-    fetchModels();
-    _loadSavedData();
+    fetchSubAreas().then((_) => fetchModels()).then((_) => _loadSavedData());
   }
 
-  void fetchSubAreas() async {
+  Future<void> fetchSubAreas() async {
     try {
       final fetchedSubAreas = await _apiService.getSubAreas();
       subAreas.assignAll(fetchedSubAreas);
@@ -49,7 +48,7 @@ class AddAsesController extends GetxController {
     }
   }
 
-  void fetchModels() async {
+  Future<void> fetchModels() async {
     try {
       final fetchedModels = await _apiService.getModels();
       models.assignAll(fetchedModels);
@@ -109,6 +108,28 @@ class AddAsesController extends GetxController {
     sopNumberController.text = _storage.read('sopNumber') ?? '';
     machineCodeAssetController.text = _storage.read('machineCodeAsset') ?? '';
     detailsController.text = _storage.read('details') ?? '';
+  
+    // Load saved SubArea, Model, and Machine data
+    final savedSubAreaId = _storage.read('subAreaId');
+    if (savedSubAreaId != null) {
+      selectedSubArea.value = subAreas.firstWhereOrNull((subArea) => subArea.id == savedSubAreaId);
+    }
+  
+    final savedModelId = _storage.read('modelId');
+    if (savedModelId != null) {
+      selectedModel.value = models.firstWhereOrNull((model) => model.id == savedModelId);
+    }
+  
+    final savedMachineId = _storage.read('machineId');
+    if (savedMachineId != null) {
+      selectedMachine.value = Machine(
+        id: savedMachineId,
+        name: _storage.read('machineName') ?? '',
+        status: _storage.read('machineStatus') ?? ''
+      );
+      machineName.value = selectedMachine.value?.name ?? '';
+      machineStatus.value = selectedMachine.value?.status;
+    }
   }
 
   void _saveData() {
@@ -116,6 +137,11 @@ class AddAsesController extends GetxController {
     _storage.write('sopNumber', sopNumberController.text);
     _storage.write('machineCodeAsset', machineCodeAssetController.text);
     _storage.write('details', detailsController.text);
+    _storage.write('subAreaId', selectedSubArea.value?.id);
+    _storage.write('modelId', selectedModel.value?.id);
+    _storage.write('machineId', selectedMachine.value?.id);
+    _storage.write('machineName', machineName.value);
+    _storage.write('machineStatus', machineStatus.value);
   }
 
   void addAssessment() async {
@@ -126,7 +152,7 @@ class AddAsesController extends GetxController {
         sopNumberController.text.isNotEmpty &&
         machineStatus.value != null) {
       final newAssessmentData = {
-        'userId': 1, // Anda mungkin perlu menyesuaikan ini
+        'userId': Get.find<UserService>().getUserId() ?? 0,
         'subAreaId': selectedSubArea.value!.id,
         'modelId': selectedModel.value!.id,
         'machineId': selectedMachine.value!.id,
@@ -139,14 +165,15 @@ class AddAsesController extends GetxController {
 
       try {
         await Get.find<AsesmentController>().addAssessment(newAssessmentData);
+        _saveData(); // Simpan data setelah berhasil menambahkan assessment
         isFormCleared.value = false;
-        Get.offAllNamed('/asesment');
+        Get.snackbar('Success', 'Assessment added successfully');
       } catch (e) {
         print('Error adding assessment: $e');
-        Get.offAllNamed('/asesment');
+        Get.snackbar('Error', 'Failed to add assessment: $e');
       }
     } else {
-      Get.snackbar('Error', 'Semua field harus diisi');
+      Get.snackbar('Error', 'All fields must be filled');
     }
   }
 

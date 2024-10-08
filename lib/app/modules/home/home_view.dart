@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import '../../../utils/app_colors.dart';
 import 'home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
@@ -28,6 +29,7 @@ class HomeView extends GetView<HomeController> {
             ),
           ],
         ),
+        backgroundColor: AppColors.primary100,
       ),
       body: FutureBuilder(
         future: Future.delayed(Duration(seconds: 2)),

@@ -19,12 +19,14 @@ class AsesmentController extends GetxController {
   }
 
   void _initializeApiService() {
-    if (!Get.isRegistered<ApiService>()) {
-      Get.put(ApiService());
+    try {
+      _apiService = Get.find<ApiService>();
+    } catch (e) {
+      Get.lazyPut(() => ApiService());
+      _apiService = Get.find<ApiService>();
     }
-    _apiService = Get.find<ApiService>();
   }
-  
+
   final startDate = Rx<DateTime?>(null);
   final endDate = Rx<DateTime?>(null);
 
@@ -41,7 +43,10 @@ class AsesmentController extends GetxController {
     try {
       isLoading(true);
       final fetchedAssessments = await _apiService.getAssessments();
-      assessments.assignAll(fetchedAssessments);
+      // Mengelompokkan assessment berdasarkan machineId dan mengambil yang terbaru
+      final latestAssessments = groupAndGetLatestAssessments(fetchedAssessments);
+      assessments.assignAll(latestAssessments);
+      applyDateFilter();
     } catch (e) {
       print('Error fetching assessments: $e');
       Get.snackbar('Error', 'Failed to fetch assessments: $e');
@@ -92,6 +97,7 @@ class AsesmentController extends GetxController {
     } else {
       filteredAssessments.value = assessments;
     }
+    print('Applied date filter. Filtered assessments: ${filteredAssessments.length}');
     _sort();
   }
 
@@ -116,21 +122,19 @@ class AsesmentController extends GetxController {
         case 1:
           return isAscending.value ? a.shift.compareTo(b.shift) : b.shift.compareTo(a.shift);
         case 2:
-          return isAscending.value ? a.assessmentDate.compareTo(b.assessmentDate) : b.assessmentDate.compareTo(a.assessmentDate);
+          return isAscending.value ? a.sopNumber.compareTo(b.sopNumber) : b.sopNumber.compareTo(a.sopNumber);
         case 3:
-          return isAscending.value ? a.subArea.area.name.compareTo(b.subArea.area.name) : b.subArea.area.name.compareTo(a.subArea.area.name);
+          return isAscending.value ? a.assessmentDate.compareTo(b.assessmentDate) : b.assessmentDate.compareTo(a.assessmentDate);
         case 4:
           return isAscending.value ? a.subArea.name.compareTo(b.subArea.name) : b.subArea.name.compareTo(a.subArea.name);
         case 5:
-          return isAscending.value ? a.sopNumber.compareTo(b.sopNumber) : b.sopNumber.compareTo(a.sopNumber);
+          return isAscending.value ? a.machine.id.compareTo(b.machine.id) : b.machine.id.compareTo(a.machine.id);
         case 6:
-          return isAscending.value ? a.model.name.compareTo(b.model.name) : b.model.name.compareTo(a.model.name);
+          return isAscending.value ? a.machine.name.compareTo(b.machine.name) : b.machine.name.compareTo(a.machine.name);
         case 7:
-        case 9:
-          final statusOrder = {'OK': 0, 'NG': 1, 'REPAIRING': 2};
-          final aStatus = statusOrder[a.machine.status.toUpperCase()] ?? 3;
-          final bStatus = statusOrder[b.machine.status.toUpperCase()] ?? 3;
-          return isAscending.value ? aStatus.compareTo(bStatus) : bStatus.compareTo(aStatus);
+          return isAscending.value ? a.machine.status.compareTo(b.machine.status) : b.machine.status.compareTo(a.machine.status);
+        case 8:
+          return isAscending.value ? a.model.name.compareTo(b.model.name) : b.model.name.compareTo(a.model.name);
         default:
           return 0;
       }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../utils/app_colors.dart';
 import '../../data/models/assessment_model.dart';
 import 'add_ases_controller.dart';
 
@@ -12,6 +13,7 @@ class AddAsesView extends GetView<AddAsesController> {
       appBar: AppBar(
         title: const Text('Add Assessment'),
         centerTitle: true,
+        backgroundColor: AppColors.primary100,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

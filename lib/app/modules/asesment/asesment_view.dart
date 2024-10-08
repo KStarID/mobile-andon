@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../utils/app_colors.dart';
 import '../../routes/app_pages.dart';
 import 'asesment_controller.dart';
 import 'package:intl/intl.dart';
@@ -13,6 +14,7 @@ class AsesmentView extends GetView<AsesmentController> {
       appBar: AppBar(
         title: const Text('Assessment'),
         centerTitle: true,
+        backgroundColor: AppColors.primary100,
         actions: [
           IconButton(
             icon: const Icon(Icons.date_range),
@@ -30,7 +32,19 @@ class AsesmentView extends GetView<AsesmentController> {
         if (controller.isLoading.value) {
           return Center(child: CircularProgressIndicator());
         } else if (controller.filteredAssessments.isEmpty) {
-          return Center(child: Text('No assessments found'));
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('No assessments found'),
+                SizedBox(height: 10),
+                Text('Total assessments: ${controller.assessments.length}'),
+                SizedBox(height: 10),
+                Text('Start Date: ${controller.startDate.value}'),
+                Text('End Date: ${controller.endDate.value}'),
+              ],
+            ),
+          );
         } else {
           return RefreshIndicator(
             onRefresh: () async {
@@ -54,26 +68,30 @@ class AsesmentView extends GetView<AsesmentController> {
                     DataColumn(label: const Text('Model'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
                     const DataColumn(label: Text('Notes')),
                   ],
-                  rows: controller.filteredAssessments.map((assessment) => DataRow(
-                    cells: [
-                      DataCell(Text(assessment.id.toString())),
-                      DataCell(Text(assessment.shift.toUpperCase())),
-                      DataCell(Text(assessment.sopNumber)),
-                      DataCell(Text(DateFormat('yyyy-MM-dd').format(assessment.assessmentDate))),
-                      DataCell(Text(assessment.subArea.area.name)),
-                      DataCell(Text(assessment.subArea.name)),
-                      DataCell(Text(assessment.machine.id)),
-                      DataCell(Text(assessment.machine.name)),
-                      DataCell(Text(assessment.machine.status.toUpperCase())),
-                      DataCell(Text(assessment.model.name)),
-                      DataCell(Text(assessment.notes ?? '')),
-                    ],
-                    onSelectChanged: (selected) {
-                      if (selected == true) {
-                        Get.toNamed(Routes.DETAIL_HISTORY, arguments: assessment);
-                      }
-                    },
-                  )).toList(),
+                  rows: controller.filteredAssessments.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final assessment = entry.value;
+                    return DataRow(
+                      cells: [
+                        DataCell(Text('${index + 1}'.padLeft(2, '0'))),
+                        DataCell(Text(assessment.shift.toUpperCase())),
+                        DataCell(Text(assessment.sopNumber)),
+                        DataCell(Text(DateFormat('yyyy-MM-dd').format(assessment.assessmentDate))),
+                        DataCell(Text(assessment.subArea.area.name)),
+                        DataCell(Text(assessment.subArea.name)),
+                        DataCell(Text(assessment.machine.id)),
+                        DataCell(Text(assessment.machine.name)),
+                        DataCell(Text(assessment.machine.status.toUpperCase())),
+                        DataCell(Text(assessment.model.name)),
+                        DataCell(Text(assessment.notes ?? '')),
+                      ],
+                      onSelectChanged: (selected) {
+                        if (selected == true) {
+                          Get.toNamed(Routes.DETAIL_HISTORY, arguments: assessment);
+                        }
+                      },
+                    );
+                  }).toList(),
                 ),
               ),
             ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../utils/app_colors.dart';
 import 'detail_history_controller.dart';
+import 'package:intl/intl.dart';
 
 class DetailHistoryView extends GetView<DetailHistoryController> {
   const DetailHistoryView({super.key});
@@ -11,6 +13,7 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
       appBar: AppBar(
         title: const Text('Detail Assessment'),
         centerTitle: true,
+        backgroundColor: AppColors.primary100,
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -42,7 +45,7 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
             heroTag: 'update-ases',
             onPressed: () {
               if (controller.assessment.value != null) {
-                Get.toNamed('/add-ases', arguments: controller.assessment.value);
+                Get.toNamed('/update-ases', arguments: controller.assessment.value);
               } else {
                 Get.snackbar('Error', 'No assessment data available');
               }
@@ -66,17 +69,17 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDetailItem('ID', assessment.id.toString()),
+            _buildDetailItem('Submitted by', assessment.user.username),
             _buildDetailItem('Shift', assessment.shift),
-            _buildDetailItem('Area', assessment.subArea.area.name),
             _buildDetailItem('Sub Area', assessment.subArea.name),
-            _buildDetailItem('Nomor SOP', assessment.sopNumber),
+            _buildDetailItem('Area', assessment.subArea.area.name),
+            _buildDetailItem('SOP Number', assessment.sopNumber),
             _buildDetailItem('Model', assessment.model.name),
-            _buildDetailItem('Kode Aset Mesin', assessment.machine.id),
-            _buildDetailItem('Nama Mesin', assessment.machine.name),
-            _buildDetailItem('Status Mesin', assessment.machine.status),
-            _buildDetailItem('Tanggal Assessment', assessment.assessmentDate.toString()),
-            _buildDetailItem('Catatan', assessment.notes ?? 'Tidak ada catatan'),
+            _buildDetailItem('Machine Code', assessment.machine.id),
+            _buildDetailItem('Machine Name', assessment.machine.name),
+            _buildDetailItem('Machine Status', assessment.machine.status),
+            _buildDetailItem('Assess Date', DateFormat('yyyy-MM-dd HH:mm:ss').format(assessment.assessmentDate)),
+            _buildDetailItem('Remarks', assessment.notes ?? 'No notes'),
           ],
         ),
       ),
@@ -123,11 +126,12 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 8),
-                _buildHistoryItem('Assessment Date', assessment.assessmentDate.toString()),
-                _buildHistoryItem('Shift', assessment.shift),
+                _buildHistoryItem('Submitted By', assessment.user.username),
+                _buildHistoryItem('Assess Date', DateFormat('yyyy-MM-dd HH:mm:ss').format(assessment.assessmentDate)),
+                _buildHistoryItem('Area', assessment.subArea.area.name),
+                _buildHistoryItem('SubArea', assessment.subArea.name),
                 _buildHistoryItem('Status', assessment.machine.status),
-                _buildHistoryItem('SOP Number', assessment.sopNumber),
-                _buildHistoryItem('Notes', assessment.notes ?? 'N/A'),
+                _buildHistoryItem('Remarks', assessment.notes ?? 'No notes'),
               ],
             ),
           ),

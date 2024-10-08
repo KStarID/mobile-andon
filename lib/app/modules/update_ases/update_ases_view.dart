@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../utils/app_colors.dart';
 import '../../data/models/assessment_model.dart';
 import 'update_ases_controller.dart';
 
@@ -12,6 +13,7 @@ class UpdateAsesView extends GetView<UpdateAsesController> {
       appBar: AppBar(
         title: const Text('Update Assessment'),
         centerTitle: true,
+        backgroundColor: AppColors.primary100,
       ),
       body: Obx(() {
         if (controller.assessment.value == null) {
