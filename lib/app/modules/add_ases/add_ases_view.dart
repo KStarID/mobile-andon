@@ -9,6 +9,7 @@ class AddAsesView extends GetView<AddAsesController> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Assessment'),
@@ -21,7 +22,7 @@ class AddAsesView extends GetView<AddAsesController> {
           child: Column(
             children: [
               Obx(() => DropdownButtonFormField<String>(
-                value: controller.selectedShift.value,
+                value: controller.selectedShiftId.value,
                 decoration: const InputDecoration(labelText: 'Shift'),
                 items: controller.shifts.map((String value) {
                   return DropdownMenuItem<String>(
@@ -32,24 +33,24 @@ class AddAsesView extends GetView<AddAsesController> {
                 onChanged: controller.updateShift,
               )),
 
-              Obx(() => DropdownButtonFormField<SubArea>(
-                value: controller.selectedSubArea.value,
+              Obx(() => DropdownButtonFormField<int>(
+                value: controller.selectedSubAreaId.value,
                 decoration: const InputDecoration(labelText: 'Sub Area'),
                 items: controller.subAreas.map((SubArea subArea) {
-                  return DropdownMenuItem<SubArea>(
-                    value: subArea,
-                    child: Text('${subArea.name} '),
+                  return DropdownMenuItem<int>(
+                    value: subArea.id,
+                    child: Text(subArea.name),
                   );
                 }).toList(),
                 onChanged: controller.updateSubArea,
               )),
 
-              Obx(() => DropdownButtonFormField<Model>(
-                value: controller.selectedModel.value,
+              Obx(() => DropdownButtonFormField<int>(
+                value: controller.selectedModelId.value,
                 decoration: const InputDecoration(labelText: 'Model'),
                 items: controller.models.map((Model model) {
-                  return DropdownMenuItem<Model>(
-                    value: model,
+                  return DropdownMenuItem<int>(
+                    value: model.id,
                     child: Text(model.name),
                   );
                 }).toList(),

@@ -28,9 +28,11 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
             children: [
               _buildDetailSection(),
               SizedBox(height: 24),
-              Text(
-                'Riwayat Perubahan',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Center(
+                child: Text(
+                  'History Movements',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
               SizedBox(height: 16),
               _buildHistoryList(),

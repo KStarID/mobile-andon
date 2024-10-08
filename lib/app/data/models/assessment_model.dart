@@ -23,15 +23,15 @@ class Assessment {
 
   factory Assessment.fromJson(Map<String, dynamic> json) {
     return Assessment(
-      id: json['id'],
-      shift: json['shift'],
-      sopNumber: json['sop_number'],
-      assessmentDate: DateTime.parse(json['assessmentDate']),
+      id: json['id'] ?? 0,
+      shift: json['shift'] ?? '',
+      sopNumber: json['sop_number'] ?? '',
+      assessmentDate: DateTime.tryParse(json['assessmentDate'] ?? '') ?? DateTime.now(),
       notes: json['notes'],
-      user: User.fromJson(json['user']),
-      subArea: SubArea.fromJson(json['subArea']),
-      machine: Machine.fromJson(json['machine']),
-      model: Model.fromJson(json['model']),
+      user: User.fromJson(json['user'] ?? {}),
+      subArea: SubArea.fromJson(json['subArea'] ?? {}),
+      machine: Machine.fromJson(json['machine'] ?? {}),
+      model: Model.fromJson(json['model'] ?? {}),
     );
   }
 }
@@ -60,6 +60,14 @@ class SubArea {
       area: Area.fromJson(json['area']),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'area': area.toJson(),
+    };
+  }
 }
 
 class Area {
@@ -73,6 +81,13 @@ class Area {
       id: json['id'],
       name: json['name'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+    };
   }
 }
 
@@ -90,6 +105,14 @@ class Machine {
       status: json['status'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'status': status,
+    };
+  }
 }
 
 class Model {
@@ -103,5 +126,12 @@ class Model {
       id: json['id'],
       name: json['name'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+    };
   }
 }

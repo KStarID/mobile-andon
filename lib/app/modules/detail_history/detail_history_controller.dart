@@ -3,7 +3,7 @@ import '../../data/models/assessment_model.dart';
 import '../../services/service.dart';
 
 class DetailHistoryController extends GetxController {
-  final ApiService _apiService = Get.find<ApiService>();
+  late final ApiService _apiService;
   final assessment = Rx<Assessment?>(null);
   final historyList = <Assessment>[].obs;
   final isLoading = true.obs;
@@ -11,6 +11,7 @@ class DetailHistoryController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _apiService = Get.put(ApiService());
     final Assessment? arg = Get.arguments;
     if (arg != null) {
       assessment.value = arg;
@@ -22,10 +23,8 @@ class DetailHistoryController extends GetxController {
     try {
       isLoading(true);
       final history = await _apiService.getAssessmentHistoryByMachineId(machineId);
-      // Urutkan berdasarkan ID secara descending (terbaru dulu)
       history.sort((a, b) => b.id.compareTo(a.id));
       historyList.assignAll(history);
-      // Memastikan assessment yang ditampilkan adalah yang terbaru
       if (historyList.isNotEmpty) {
         assessment.value = historyList.first;
       }

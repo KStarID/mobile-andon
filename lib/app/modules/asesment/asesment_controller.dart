@@ -43,7 +43,6 @@ class AsesmentController extends GetxController {
     try {
       isLoading(true);
       final fetchedAssessments = await _apiService.getAssessments();
-      // Mengelompokkan assessment berdasarkan machineId dan mengambil yang terbaru
       final latestAssessments = groupAndGetLatestAssessments(fetchedAssessments);
       assessments.assignAll(latestAssessments);
       applyDateFilter();
@@ -72,6 +71,7 @@ class AsesmentController extends GetxController {
       final createdAssessment = await _apiService.createAssessment(assessmentData);
       assessments.add(createdAssessment);
       applyDateFilter();
+      update();
     } catch (e) {
       print('Error adding assessment: $e');
       rethrow;

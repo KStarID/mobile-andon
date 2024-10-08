@@ -1,41 +1,43 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/models/assessment_model.dart';
 import '../../routes/app_pages.dart';
-import '../../services/user_service.dart';
 import '../asesment/asesment_controller.dart';
 import '../../services/service.dart';
 
 class AddAsesController extends GetxController {
-  final ApiService _apiService = ApiService();
-  final shiftController = TextEditingController();
+  late ApiService _apiService;
+  late AuthService _authService;
+  late SharedPreferences prefs;
+
   final sopNumberController = TextEditingController();
   final machineCodeAssetController = TextEditingController();
   final detailsController = TextEditingController();
 
-  final isFormCleared = true.obs;
-  final _storage = GetStorage();
-
-  final selectedShift = Rx<String?>(null);
-  final selectedSubArea = Rx<SubArea?>(null);
-  final selectedModel = Rx<Model?>(null);
-  final selectedMachine = Rx<Machine?>(null);
+  final selectedShiftId = RxnString();
+  final selectedSubAreaId = RxnInt();
+  final selectedModelId = RxnInt();
+  final selectedMachineId = RxnString();
 
   final shifts = ['Day', 'Night'];
   final subAreas = <SubArea>[].obs;
   final models = <Model>[].obs;
 
-  // Tambahkan ini
   final machineName = ''.obs;
   final machineStatus = Rx<String?>(null);
   final machineStatusOptions = ['ok', 'ng', 'repairing'];
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
-    fetchSubAreas().then((_) => fetchModels()).then((_) => _loadSavedData());
+    _apiService = Get.put(ApiService());
+    _authService = Get.put(AuthService());
+    prefs = await SharedPreferences.getInstance();
+    await fetchSubAreas();
+    await fetchModels();
+    loadSavedData();
   }
 
   Future<void> fetchSubAreas() async {
@@ -44,7 +46,7 @@ class AddAsesController extends GetxController {
       subAreas.assignAll(fetchedSubAreas);
     } catch (e) {
       print('Error fetching sub areas: $e');
-      Get.snackbar('Error', 'Failed to fetch sub areas');
+      Get.snackbar('Error', 'Gagal mengambil data sub area');
     }
   }
 
@@ -54,155 +56,153 @@ class AddAsesController extends GetxController {
       models.assignAll(fetchedModels);
     } catch (e) {
       print('Error fetching models: $e');
-      Get.snackbar('Error', 'Failed to fetch models');
+      Get.snackbar('Error', 'Gagal mengambil data model');
     }
   }
 
   void updateShift(String? newValue) {
-    if (newValue != null && newValue != selectedShift.value) {
-      selectedShift.value = newValue;
-      shiftController.text = newValue;
-    }
+    selectedShiftId.value = newValue;
+    saveData();
   }
 
-  void updateSubArea(SubArea? newValue) {
-    if (newValue != null) {
-      selectedSubArea.value = newValue;
-    }
+  void updateSubArea(int? newValue) {
+    selectedSubAreaId.value = newValue;
+    saveData();
   }
 
-  void updateModel(Model? newValue) {
-    if (newValue != null) {
-      selectedModel.value = newValue;
-    }
+  void updateModel(int? newValue) {
+    selectedModelId.value = newValue;
+    saveData();
   }
 
   void fetchMachineDetails() async {
     if (machineCodeAssetController.text.isNotEmpty) {
       try {
         final machine = await _apiService.getMachineDetails(machineCodeAssetController.text);
-        selectedMachine.value = machine;
+        selectedMachineId.value = machine.id;
         machineName.value = machine.name;
         updateMachineStatus(machine.status);
+        saveData();
       } catch (e) {
         print('Error fetching machine details: $e');
-        Get.snackbar('Error', 'Failed to fetch machine details');
+        Get.snackbar('Error', 'Gagal mengambil detail mesin');
       }
     }
   }
 
   void updateMachineStatus(String? newValue) {
-    if (newValue != null && machineStatusOptions.contains(newValue)) {
-      machineStatus.value = newValue;
-    } else {
-      machineStatus.value = null;
-    }
-  }
-
-  void _loadSavedData() {
-    final savedShift = _storage.read('shift');
-    if (savedShift != null && shifts.contains(savedShift)) {
-      selectedShift.value = savedShift;
-      shiftController.text = savedShift;
-    }
-    sopNumberController.text = _storage.read('sopNumber') ?? '';
-    machineCodeAssetController.text = _storage.read('machineCodeAsset') ?? '';
-    detailsController.text = _storage.read('details') ?? '';
-  
-    // Load saved SubArea, Model, and Machine data
-    final savedSubAreaId = _storage.read('subAreaId');
-    if (savedSubAreaId != null) {
-      selectedSubArea.value = subAreas.firstWhereOrNull((subArea) => subArea.id == savedSubAreaId);
-    }
-  
-    final savedModelId = _storage.read('modelId');
-    if (savedModelId != null) {
-      selectedModel.value = models.firstWhereOrNull((model) => model.id == savedModelId);
-    }
-  
-    final savedMachineId = _storage.read('machineId');
-    if (savedMachineId != null) {
-      selectedMachine.value = Machine(
-        id: savedMachineId,
-        name: _storage.read('machineName') ?? '',
-        status: _storage.read('machineStatus') ?? ''
-      );
-      machineName.value = selectedMachine.value?.name ?? '';
-      machineStatus.value = selectedMachine.value?.status;
-    }
-  }
-
-  void _saveData() {
-    _storage.write('shift', selectedShift.value);
-    _storage.write('sopNumber', sopNumberController.text);
-    _storage.write('machineCodeAsset', machineCodeAssetController.text);
-    _storage.write('details', detailsController.text);
-    _storage.write('subAreaId', selectedSubArea.value?.id);
-    _storage.write('modelId', selectedModel.value?.id);
-    _storage.write('machineId', selectedMachine.value?.id);
-    _storage.write('machineName', machineName.value);
-    _storage.write('machineStatus', machineStatus.value);
+    machineStatus.value = newValue;
+    saveData();
   }
 
   void addAssessment() async {
-    if (selectedShift.value != null &&
-        selectedSubArea.value != null &&
-        selectedModel.value != null &&
-        selectedMachine.value != null &&
-        sopNumberController.text.isNotEmpty &&
-        machineStatus.value != null) {
-      final newAssessmentData = {
-        'userId': Get.find<UserService>().getUserId() ?? 0,
-        'subAreaId': selectedSubArea.value!.id,
-        'modelId': selectedModel.value!.id,
-        'machineId': selectedMachine.value!.id,
-        'status': machineStatus.value,
-        'sop_number': sopNumberController.text,
-        'assessmentDate': DateTime.now().toIso8601String().split('T')[0],
-        'shift': selectedShift.value!.toLowerCase(),
-        'notes': detailsController.text,
-      };
+    if (selectedShiftId.value == null ||
+        selectedSubAreaId.value == null ||
+        selectedModelId.value == null ||
+        selectedMachineId.value == null ||
+        sopNumberController.text.isEmpty ||
+        machineStatus.value == null) {
+      Get.snackbar('Error', 'Semua field harus diisi kecuali notes');
+      return;
+    }
 
-      try {
-        await Get.find<AsesmentController>().addAssessment(newAssessmentData);
-        _saveData(); // Simpan data setelah berhasil menambahkan assessment
-        isFormCleared.value = false;
-        Get.snackbar('Success', 'Assessment added successfully');
-      } catch (e) {
-        print('Error adding assessment: $e');
-        Get.snackbar('Error', 'Failed to add assessment: $e');
-      }
-    } else {
-      Get.snackbar('Error', 'All fields must be filled');
+    final userId = _authService.getUserId();
+    if (userId == null) {
+      Get.snackbar('Error', 'User ID tidak ditemukan');
+      return;
+    }
+
+    final newAssessmentData = {
+      'userId': userId,
+      'subAreaId': selectedSubAreaId.value!,
+      'modelId': selectedModelId.value!,
+      'machineId': selectedMachineId.value!,
+      'status': machineStatus.value!,
+      'sop_number': sopNumberController.text,
+      'assessmentDate': DateTime.now().toIso8601String(),
+      'shift': selectedShiftId.value!,
+      'notes': detailsController.text.isNotEmpty ? detailsController.text : null,
+    };
+
+    try {
+      await Get.find<AsesmentController>().addAssessment(newAssessmentData);
+      Get.snackbar('Success', 'Assessment successfully added');
+      Get.offAllNamed('/asesment');
+    } catch (e) {
+      print('Error adding assessment: $e');
+      Get.snackbar('Success', 'Assessment successfully added');
+      Get.offAllNamed('/asesment');
     }
   }
 
   void clearForm() {
-    shiftController.clear();
     sopNumberController.clear();
     machineCodeAssetController.clear();
     detailsController.clear();
-    selectedShift.value = null;
-    selectedSubArea.value = null;
-    selectedModel.value = null;
-    selectedMachine.value = null;
-    machineName.value = ''; // Tambahkan ini
-    machineStatus.value = null; // Tambahkan ini
-    _storage.erase();
-    isFormCleared.value = true;
+    selectedShiftId.value = null;
+    selectedSubAreaId.value = null;
+    selectedModelId.value = null;
+    selectedMachineId.value = null;
+    machineName.value = '';
+    machineStatus.value = null;
+    prefs.clear();
   }
 
   void scanQRCode() async {
-    final result = await Get.toNamed(Routes.QR_SCAN, arguments: false);
-    if (result != null) {
-      machineCodeAssetController.text = result;
-      fetchMachineDetails();
+    try {
+      final result = await Get.toNamed(Routes.QR_SCAN, arguments: false);
+      if (result != null) {
+        machineCodeAssetController.text = result;
+        fetchMachineDetails();
+      }
+    } catch (e) {
+      print('Error scanning QR code: $e');
+      Get.snackbar('Error', 'Gagal memindai kode QR: $e');
     }
+  }
+
+  void saveData() {
+    prefs.setString('shiftId', selectedShiftId.value ?? '');
+    prefs.setInt('subAreaId', selectedSubAreaId.value ?? 0);
+    prefs.setInt('modelId', selectedModelId.value ?? 0);
+    prefs.setString('machineId', selectedMachineId.value ?? '');
+    prefs.setString('sopNumber', sopNumberController.text);
+    prefs.setString('machineCodeAsset', machineCodeAssetController.text);
+    prefs.setString('machineName', machineName.value);
+    prefs.setString('machineStatus', machineStatus.value ?? '');
+    prefs.setString('details', detailsController.text);
+  }
+
+  void loadSavedData() {
+    selectedShiftId.value = prefs.getString('shiftId');
+    if (selectedShiftId.value == null || !shifts.contains(selectedShiftId.value)) {
+      selectedShiftId.value = shifts.isNotEmpty ? shifts.first : null;
+    }
+
+    selectedSubAreaId.value = prefs.getInt('subAreaId');
+    if (selectedSubAreaId.value == null || !subAreas.any((sa) => sa.id == selectedSubAreaId.value)) {
+      selectedSubAreaId.value = subAreas.isNotEmpty ? subAreas.first.id : null;
+    }
+
+    selectedModelId.value = prefs.getInt('modelId');
+    if (selectedModelId.value == null || !models.any((m) => m.id == selectedModelId.value)) {
+      selectedModelId.value = models.isNotEmpty ? models.first.id : null;
+    }
+
+    selectedMachineId.value = prefs.getString('machineId');
+    
+    sopNumberController.text = prefs.getString('sopNumber') ?? '';
+    machineCodeAssetController.text = prefs.getString('machineCodeAsset') ?? '';
+    machineName.value = prefs.getString('machineName') ?? '';
+    machineStatus.value = prefs.getString('machineStatus');
+    if (machineStatus.value == null || !machineStatusOptions.contains(machineStatus.value)) {
+      machineStatus.value = machineStatusOptions.isNotEmpty ? machineStatusOptions.first : null;
+    }
+    detailsController.text = prefs.getString('details') ?? '';
   }
 
   @override
   void onClose() {
-    shiftController.dispose();
     sopNumberController.dispose();
     machineCodeAssetController.dispose();
     detailsController.dispose();

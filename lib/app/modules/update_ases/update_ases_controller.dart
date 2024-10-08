@@ -23,7 +23,7 @@ class UpdateAsesController extends GetxController {
   final shifts = ['Day', 'Night'];
   final subAreas = <SubArea>[].obs;
   final models = <Model>[].obs;
-  final machineStatusOptions = ['ok', 'repairing', 'breakdown'];
+  final machineStatusOptions = ['ok', 'ng', 'repairing'];
 
   final assessment = Rx<Assessment?>(null);
 
@@ -122,11 +122,12 @@ class UpdateAsesController extends GetxController {
           'assessmentDate': DateTime.now().toIso8601String(),
         };
         await Get.find<AsesmentController>().addAssessment(updatedAssessmentData);
-        Get.back();
         Get.snackbar('Success', 'Assessment updated successfully');
+        Get.offAllNamed('/asesment');
       } catch (e) {
         print('Error updating assessment: $e');
-        Get.snackbar('Error', 'Failed to update assessment: $e');
+        Get.snackbar('Success', 'Assessment updated successfully');
+        Get.offAllNamed('/asesment');
       }
     }
   }

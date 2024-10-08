@@ -55,18 +55,19 @@ class AsesmentView extends GetView<AsesmentController> {
               scrollDirection: Axis.horizontal,
               child: SingleChildScrollView(
                 child: DataTable(
+                  headingRowColor: MaterialStateProperty.all(AppColors.primary300),
                   columns: [
-                    DataColumn(label: const Text('ID'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
-                    DataColumn(label: const Text('Shift'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
-                    DataColumn(label: const Text('SOP Number'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
-                    DataColumn(label: const Text('Assessment Date'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
-                    DataColumn(label: const Text('Area'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
-                    DataColumn(label: const Text('Sub Area'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
-                    DataColumn(label: const Text('Machine ID'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
-                    DataColumn(label: const Text('Machine Name'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
-                    DataColumn(label: const Text('Machine Status'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
-                    DataColumn(label: const Text('Model'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
-                    const DataColumn(label: Text('Notes')),
+                    DataColumn(label: Text('ID', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: Text('Shift', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: Text('SOP Number', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: Text('Assessment Date', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: Text('Area', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: Text('Sub Area', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: Text('Machine ID', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: Text('Machine Name', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: Text('Machine Status', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: Text('Model', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: Text('Remarks', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold))),
                   ],
                   rows: controller.filteredAssessments.asMap().entries.map((entry) {
                     final index = entry.key;
@@ -124,11 +125,11 @@ class AsesmentView extends GetView<AsesmentController> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: 'Dashboard',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.assessment),
-            label: 'Assesmen',
+            label: 'Assessment',
           ),
         ],
         onTap: (index) {
