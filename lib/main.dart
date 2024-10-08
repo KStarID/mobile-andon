@@ -4,7 +4,7 @@ import 'app/routes/app_pages.dart';
 import 'app/services/service.dart';
 import 'app/services/user_service.dart';
 
-void main() {
+void main() async {
   Get.put(AuthService());
   Get.put(UserService());
   runApp(

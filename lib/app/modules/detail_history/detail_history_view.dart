@@ -15,9 +15,8 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
       body: Obx(() {
         if (controller.isLoading.value) {
           return Center(child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-                  ),
-                );
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+          ));
         }
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -36,10 +35,30 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
           ),
         );
       }),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: 'update-ases',
+            onPressed: () {
+              if (controller.assessment.value != null) {
+                Get.toNamed('/add-ases', arguments: controller.assessment.value);
+              } else {
+                Get.snackbar('Error', 'No assessment data available');
+              }
+            },
+            child: const Icon(Icons.edit),
+          ),
+          SizedBox(height: 16),
+        ],
+      ),
     );
   }
 
   Widget _buildDetailSection() {
+    final assessment = controller.assessment.value;
+    if (assessment == null) return SizedBox.shrink();
+
     return Card(
       elevation: 4,
       child: Padding(
@@ -47,23 +66,24 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDetailItem('No', controller.assessment.value.no.toString()),
-            _buildDetailItem('Shift', controller.assessment.value.shift),
-            _buildDetailItem('Area', controller.assessment.value.area),
-            _buildDetailItem('Sub Area', controller.assessment.value.subArea),
-            _buildDetailItem('Nomor SOP', controller.assessment.value.sopNumber),
-            _buildDetailItem('Model', controller.assessment.value.model),
-            _buildDetailItem('Kode Aset Mesin', controller.assessment.value.machineCodeAsset),
-            _buildDetailItem('Nama Mesin', controller.assessment.value.machineName),
-            _buildDetailItem('Status', controller.assessment.value.status),
-            _buildDetailItem('Detail', controller.assessment.value.details),
+            _buildDetailItem('ID', assessment.id.toString()),
+            _buildDetailItem('Shift', assessment.shift),
+            _buildDetailItem('Area', assessment.subArea.area.name),
+            _buildDetailItem('Sub Area', assessment.subArea.name),
+            _buildDetailItem('Nomor SOP', assessment.sopNumber),
+            _buildDetailItem('Model', assessment.model.name),
+            _buildDetailItem('Kode Aset Mesin', assessment.machine.id),
+            _buildDetailItem('Nama Mesin', assessment.machine.name),
+            _buildDetailItem('Status Mesin', assessment.machine.status),
+            _buildDetailItem('Tanggal Assessment', assessment.assessmentDate.toString()),
+            _buildDetailItem('Catatan', assessment.notes ?? 'Tidak ada catatan'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDetailItem(String label, String? value) {
+  Widget _buildDetailItem(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -77,7 +97,7 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
             ),
           ),
           Expanded(
-            child: Text(value ?? 'N/A'),
+            child: Text(value),
           ),
         ],
       ),
@@ -90,7 +110,7 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
       physics: NeverScrollableScrollPhysics(),
       itemCount: controller.historyList.length,
       itemBuilder: (context, index) {
-        final history = controller.historyList[index];
+        final assessment = controller.historyList[index];
         return Card(
           margin: EdgeInsets.only(bottom: 16),
           child: Padding(
@@ -99,15 +119,15 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Perubahan #${index + 1}',
+                  'Assessment #${index + 1}',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 8),
-                _buildHistoryItem('Submitted by', history.submittedBy),
-                _buildHistoryItem('Updated Time', history.updatedTime),
-                _buildHistoryItem('Sub Area', history.subArea),
-                _buildHistoryItem('Status', history.status),
-                _buildHistoryItem('Remark', history.remark),
+                _buildHistoryItem('Assessment Date', assessment.assessmentDate.toString()),
+                _buildHistoryItem('Shift', assessment.shift),
+                _buildHistoryItem('Status', assessment.machine.status),
+                _buildHistoryItem('SOP Number', assessment.sopNumber),
+                _buildHistoryItem('Notes', assessment.notes ?? 'N/A'),
               ],
             ),
           ),

@@ -41,6 +41,8 @@ dependencies:
   mobile_scanner: ^5.2.3
   http: ^1.2.2
   shared_preferences: ^2.2.3
+  get_storage: ^2.1.1
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

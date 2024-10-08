@@ -10,4 +10,5 @@ class UserService extends GetxService {
   String? getUsername() {
     return username.value;
   }
+
 }

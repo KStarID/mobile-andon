@@ -4,7 +4,8 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../asesment/asesment_controller.dart';
 
 class QRScannerView extends StatefulWidget {
-  const QRScannerView({super.key});
+  final bool isFromAsesment;
+  const QRScannerView({super.key, required this.isFromAsesment});
 
   @override
   State<QRScannerView> createState() => _QRScannerViewState();
@@ -12,26 +13,31 @@ class QRScannerView extends StatefulWidget {
 
 class _QRScannerViewState extends State<QRScannerView> {
   final AsesmentController asesmentController = Get.find<AsesmentController>();
-  Barcode? _barcode;
+  MobileScannerController cameraController = MobileScannerController();
+
+  @override
+  void dispose() {
+    cameraController.dispose();
+    super.dispose();
+  }
 
   void _handleBarcode(BarcodeCapture barcodes) {
-    if (mounted) {
-      setState(() {
-        _barcode = barcodes.barcodes.firstOrNull;
-      });
-      _processQRCode(_barcode?.rawValue);
+    final String? code = barcodes.barcodes.firstOrNull?.rawValue;
+    if (code != null) {
+      _processQRCode(code);
     }
   }
 
-  void _processQRCode(String? code) {
-    if (code != null) {
+  void _processQRCode(String code) {
+    if (widget.isFromAsesment) {
       final assessment = asesmentController.findAssessmentByQRCode(code);
       if (assessment != null) {
-        Get.back();
-        Get.toNamed('/assessment-detail', arguments: assessment);
+        Get.back(result: assessment);
       } else {
-        Get.snackbar('Error', 'Data asesmen tidak ditemukan');
+        Get.snackbar('Error', 'Data not found, please add new assessment');
       }
+    } else {
+      Get.back(result: code);
     }
   }
 
@@ -43,6 +49,7 @@ class _QRScannerViewState extends State<QRScannerView> {
       body: Stack(
         children: [
           MobileScanner(
+            controller: cameraController,
             onDetect: _handleBarcode,
           ),
           Align(
@@ -51,15 +58,14 @@ class _QRScannerViewState extends State<QRScannerView> {
               alignment: Alignment.bottomCenter,
               height: 100,
               color: Colors.black.withOpacity(0.4),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Expanded(
                     child: Center(
                       child: Text(
-                        _barcode?.displayValue ?? 'Scan QR Code',
-                        overflow: TextOverflow.fade,
-                        style: const TextStyle(color: Colors.white),
+                        'Scan QR Code',
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ),

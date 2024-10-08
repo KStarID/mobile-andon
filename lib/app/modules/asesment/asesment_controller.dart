@@ -1,93 +1,105 @@
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../data/models/assessment_model.dart';
+import '../../services/service.dart';
 
 class AsesmentController extends GetxController {
+  late final ApiService _apiService;
   final assessments = <Assessment>[].obs;
   final filteredAssessments = <Assessment>[].obs;
-  final searchQuery = ''.obs;
+  final isLoading = true.obs;
+  final error = Rx<String?>(null);
   final sortColumnIndex = 0.obs;
   final isAscending = true.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _initializeApiService();
+    fetchAssessments();
+  }
+
+  void _initializeApiService() {
+    if (!Get.isRegistered<ApiService>()) {
+      Get.put(ApiService());
+    }
+    _apiService = Get.find<ApiService>();
+  }
   
-  final selectedDate = Rx<DateTime?>(null);
-  final selectedMonth = Rx<DateTime?>(null);
-  final selectedYear = Rx<DateTime?>(null);
+  final startDate = Rx<DateTime?>(null);
+  final endDate = Rx<DateTime?>(null);
 
   Assessment? findAssessmentByQRCode(String qrCode) {
     try {
-      return filteredAssessments.firstWhereOrNull((assessment) => assessment.machineCodeAsset == qrCode);
+      return assessments.firstWhereOrNull((assessment) => assessment.machine.id == qrCode);
     } catch (e) {
       print('Error dalam findAssessmentByQRCode: $e');
       return null;
     }
   }
 
-  @override
-
-  void onInit() {
-    super.onInit();
-    // Inisialisasi data dummy
+  Future<void> fetchAssessments() async {
     try {
-      
-      assessments.addAll([
-      Assessment(no: 1, shift: 'Day', updatedTime: '2023-06-01', area: 'Area A', subArea: 'Sub A', sopNumber: 'SOP001', model: 'Model X', machineCodeAsset: 'MC001', machineName: 'Machine 1', status: 'OK', details: 'Detail 1'),
-      Assessment(no: 2, shift: 'Night', updatedTime: '2023-06-02', area: 'Area B', subArea: 'Sub B', sopNumber: 'SOP002', model: 'Model Y', machineCodeAsset: 'MC002', machineName: 'Machine 2', status: 'NG', details: 'Detail 2'),
-      Assessment(no: 3, shift: 'Day', updatedTime: '2023-06-03', area: 'Area C', subArea: 'Sub C', sopNumber: 'SOP003', model: 'Model Z', machineCodeAsset: 'MC003', machineName: 'Machine 3', status: 'OK', details: 'Detail 3'),
-      Assessment(no: 4, shift: 'Night', updatedTime: '2023-06-04', area: 'Area D', subArea: 'Sub D', sopNumber: 'SOP004', model: 'Model C', machineCodeAsset: 'MC004', machineName: 'Machine 4', status: 'REPAIRING', details: 'Detail 4'),
-      Assessment(no: 5, shift: 'Day', updatedTime: '2023-06-05', area: 'Area E', subArea: 'Sub E', sopNumber: 'SOP005', model: 'Model D', machineCodeAsset: 'MC005', machineName: 'Machine 5', status: 'OK', details: 'Detail 5'),
-      // Tambahkan data dummy lainnya...
-    ]);
-    filteredAssessments.addAll(assessments);
-    if (kDebugMode) {
-      print('assessments successfully added');
-    }
+      isLoading(true);
+      final fetchedAssessments = await _apiService.getAssessments();
+      assessments.assignAll(fetchedAssessments);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error adding assessments: $e');
-      }
+      print('Error fetching assessments: $e');
+      Get.snackbar('Error', 'Failed to fetch assessments: $e');
+    } finally {
+      isLoading(false);
     }
   }
 
-  void addAssessment(Assessment assessment) {
-    assessments.add(assessment);
-    filteredAssessments.add(assessment);
+  List<Assessment> groupAndGetLatestAssessments(List<Assessment> allAssessments) {
+    final groupedAssessments = <String, Assessment>{};
+    for (var assessment in allAssessments) {
+      final existingAssessment = groupedAssessments[assessment.machine.id];
+      if (existingAssessment == null || assessment.assessmentDate.isAfter(existingAssessment.assessmentDate)) {
+        groupedAssessments[assessment.machine.id] = assessment;
+      }
+    }
+    return groupedAssessments.values.toList();
   }
 
-  void _applyFilters() {
-    filteredAssessments.value = assessments.where((assessment) {
-      final assessmentDate = DateTime.parse(assessment.updatedTime);
-      
-      bool dateMatch = true;
-      bool monthMatch = true;
-      bool yearMatch = true;
+  Future<void> addAssessment(Map<String, dynamic> assessmentData) async {
+    try {
+      isLoading(true);
+      final createdAssessment = await _apiService.createAssessment(assessmentData);
+      assessments.add(createdAssessment);
+      applyDateFilter();
+    } catch (e) {
+      print('Error adding assessment: $e');
+      rethrow;
+    } finally {
+      isLoading(false);
+    }
+  }
 
-      if (selectedDate.value != null) {
-        dateMatch = assessmentDate.year == selectedDate.value!.year &&
-                    assessmentDate.month == selectedDate.value!.month &&
-                    assessmentDate.day == selectedDate.value!.day;
-      }
+  void setStartDate(DateTime date) {
+    startDate.value = date;
+  }
 
-      if (selectedMonth.value != null) {
-        monthMatch = assessmentDate.year == selectedMonth.value!.year &&
-                     assessmentDate.month == selectedMonth.value!.month;
-      }
+  void setEndDate(DateTime date) {
+    endDate.value = date;
+  }
 
-      if (selectedYear.value != null) {
-        yearMatch = assessmentDate.year == selectedYear.value!.year;
-      }
-
-      return dateMatch && monthMatch && yearMatch &&
-             (assessment.area.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-              assessment.subArea.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-              assessment.machineName.toLowerCase().contains(searchQuery.value.toLowerCase()));
-    }).toList();
-
+  void applyDateFilter() {
+    if (startDate.value != null && endDate.value != null) {
+      filteredAssessments.value = assessments.where((assessment) {
+        return assessment.assessmentDate.isAfter(startDate.value!) && 
+               assessment.assessmentDate.isBefore(endDate.value!.add(Duration(days: 1)));
+      }).toList();
+    } else {
+      filteredAssessments.value = assessments;
+    }
     _sort();
   }
 
-  void search(String query) {
-    searchQuery.value = query;
-    _applyFilters();
+  void clearDateFilter() {
+    startDate.value = null;
+    endDate.value = null;
+    filteredAssessments.value = assessments;
+    _sort();
   }
 
   void sort(int columnIndex, bool ascending) {
@@ -96,50 +108,40 @@ class AsesmentController extends GetxController {
     _sort();
   }
 
-  void filterByDate(DateTime? date) {
-    selectedDate.value = date;
-    _applyFilters();
-  }
-
-  void filterByMonth(DateTime? month) {
-    selectedMonth.value = month;
-    _applyFilters();
-  }
-
-  void filterByYear(DateTime? year) {
-    selectedYear.value = year;
-    _applyFilters();
-  }
-
   void _sort() {
     filteredAssessments.sort((a, b) {
       switch (sortColumnIndex.value) {
         case 0:
-          return isAscending.value ? a.no.compareTo(b.no) : b.no.compareTo(a.no);
+          return isAscending.value ? a.id.compareTo(b.id) : b.id.compareTo(a.id);
         case 1:
           return isAscending.value ? a.shift.compareTo(b.shift) : b.shift.compareTo(a.shift);
         case 2:
-          return isAscending.value ? a.updatedTime.compareTo(b.updatedTime) : b.updatedTime.compareTo(a.updatedTime);
+          return isAscending.value ? a.assessmentDate.compareTo(b.assessmentDate) : b.assessmentDate.compareTo(a.assessmentDate);
         case 3:
-          return isAscending.value ? a.area.compareTo(b.area) : b.area.compareTo(a.area);
+          return isAscending.value ? a.subArea.area.name.compareTo(b.subArea.area.name) : b.subArea.area.name.compareTo(a.subArea.area.name);
         case 4:
-          return isAscending.value ? a.subArea.compareTo(b.subArea) : b.subArea.compareTo(a.subArea);
+          return isAscending.value ? a.subArea.name.compareTo(b.subArea.name) : b.subArea.name.compareTo(a.subArea.name);
         case 5:
           return isAscending.value ? a.sopNumber.compareTo(b.sopNumber) : b.sopNumber.compareTo(a.sopNumber);
         case 6:
-          return isAscending.value ? a.model.compareTo(b.model) : b.model.compareTo(a.model);
+          return isAscending.value ? a.model.name.compareTo(b.model.name) : b.model.name.compareTo(a.model.name);
         case 7:
-          return isAscending.value ? a.machineCodeAsset.compareTo(b.machineCodeAsset) : b.machineCodeAsset.compareTo(a.machineCodeAsset);
-        case 8:
-          return isAscending.value ? a.machineName.compareTo(b.machineName) : b.machineName.compareTo(a.machineName);
         case 9:
           final statusOrder = {'OK': 0, 'NG': 1, 'REPAIRING': 2};
-          final aStatus = statusOrder[a.status.toUpperCase()] ?? 3;
-          final bStatus = statusOrder[b.status.toUpperCase()] ?? 3;
+          final aStatus = statusOrder[a.machine.status.toUpperCase()] ?? 3;
+          final bStatus = statusOrder[b.machine.status.toUpperCase()] ?? 3;
           return isAscending.value ? aStatus.compareTo(bStatus) : bStatus.compareTo(aStatus);
         default:
           return 0;
       }
     });
+  }
+
+  void updateAssessmentList(Assessment updatedAssessment) {
+    final index = assessments.indexWhere((a) => a.id == updatedAssessment.id);
+    if (index != -1) {
+      assessments[index] = updatedAssessment;
+      assessments.refresh();
+    }
   }
 }

@@ -1,55 +1,107 @@
 class Assessment {
-  final int no;
+  final int id;
   final String shift;
-  final String updatedTime;
-  final String area;
-  final String subArea;
   final String sopNumber;
-  final String model;
-  final String machineCodeAsset;
-  final String machineName;
-  final String status;
-  final String details;
+  final DateTime assessmentDate;
+  final String? notes;
+  final User user;
+  final SubArea subArea;
+  final Machine machine;
+  final Model model;
 
   Assessment({
-    required this.no,
+    required this.id,
     required this.shift,
-    required this.updatedTime,
-    required this.area,
-    required this.subArea,
     required this.sopNumber,
+    required this.assessmentDate,
+    this.notes,
+    required this.user,
+    required this.subArea,
+    required this.machine,
     required this.model,
-    required this.machineCodeAsset,
-    required this.machineName,
-    required this.status,
-    required this.details,
   });
 
-  factory Assessment.fromJson(Map<String, dynamic> json) => Assessment(
-        no: json['id'],
-        shift: json['shift'],
-        updatedTime: json['updatedTime'],
-        area: json['area'],
-        subArea: json['subArea'],
-        sopNumber: json['sopNumber'],
-        model: json['model'],
-        machineCodeAsset: json['machineCodeAsset'],
-        machineName: json['machineName'],
-        status: json['status'],
-        details: json['details'],
-      );
+  factory Assessment.fromJson(Map<String, dynamic> json) {
+    return Assessment(
+      id: json['id'],
+      shift: json['shift'],
+      sopNumber: json['sop_number'],
+      assessmentDate: DateTime.parse(json['assessmentDate']),
+      notes: json['notes'],
+      user: User.fromJson(json['user']),
+      subArea: SubArea.fromJson(json['subArea']),
+      machine: Machine.fromJson(json['machine']),
+      model: Model.fromJson(json['model']),
+    );
+  }
+}
 
-  Map<String, dynamic> toJson() => {
-        'number': no,
-        'shift': shift,
-        'updatedTime': updatedTime,
-        'area': area,
-        'subArea': subArea,
-        'sopNumber': sopNumber,
-        'model': model,
-        'machineCodeAsset': machineCodeAsset,
-        'machineName': machineName,
-        'status': status,
-        'details': details,
-      };
+class User {
+  final String username;
+
+  User({required this.username});
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(username: json['username']);
+  }
+}
+
+class SubArea {
+  final int id;
+  final String name;
+  final Area area;
+
+  SubArea({required this.id, required this.name, required this.area});
+
+  factory SubArea.fromJson(Map<String, dynamic> json) {
+    return SubArea(
+      id: json['id'],
+      name: json['name'],
+      area: Area.fromJson(json['area']),
+    );
+  }
+}
+
+class Area {
+  final int id;
+  final String name;
+
+  Area({required this.id, required this.name});
+
+  factory Area.fromJson(Map<String, dynamic> json) {
+    return Area(
+      id: json['id'],
+      name: json['name'],
+    );
+  }
+}
+
+class Machine {
+  final String id;
+  final String name;
+  final String status;
+
+  Machine({required this.id, required this.name, required this.status});
+
+  factory Machine.fromJson(Map<String, dynamic> json) {
+    return Machine(
+      id: json['id'],
+      name: json['name'],
+      status: json['status'],
+    );
+  }
+}
+
+class Model {
+  final int id;
+  final String name;
+
+  Model({required this.id, required this.name});
+
+  factory Model.fromJson(Map<String, dynamic> json) {
+    return Model(
+      id: json['id'],
+      name: json['name'],
+    );
+  }
 }

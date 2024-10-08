@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../routes/app_pages.dart';
 import 'asesment_controller.dart';
+import 'package:intl/intl.dart';
 
 class AsesmentView extends GetView<AsesmentController> {
-  const AsesmentView({super.key});
+  const AsesmentView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -13,138 +15,92 @@ class AsesmentView extends GetView<AsesmentController> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () => _showFilterDialog(context),
+            icon: const Icon(Icons.date_range),
+            onPressed: () => _showDateRangeDialog(context),
           ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              // Implementasi logika logout di sini
               Get.offAllNamed('/splash-screen');
             },
           ),
         ],
       ),
-      body: FutureBuilder(
-        future: Future.delayed(Duration(seconds: 1)),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-              ),
-            );
-          }
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  onChanged: controller.search,
-                  decoration: InputDecoration(
-                    labelText: 'Cari',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Obx(() => DataTable(
-                    sortColumnIndex: controller.sortColumnIndex.value,
-                    sortAscending: controller.isAscending.value,
-                    columns: [
-                      DataColumn(
-                        label: const Text('No.'),
-                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                      ),
-                      DataColumn(
-                        label: const Text('Shift'),
-                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                      ),
-                      DataColumn(
-                        label: const Text('Updated Time'),
-                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                      ),
-                      DataColumn(
-                        label: const Text('Area'),
-                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                      ),
-                      DataColumn(
-                        label: const Text('Sub Area'),
-                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                      ),
-                      DataColumn(
-                        label: const Text('SOP Number'),
-                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                      ),
-                      DataColumn(
-                        label: const Text('Models'),
-                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                      ),
-                      DataColumn(
-                        label: const Text('Code Asset'),
-                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                      ),
-                      DataColumn(
-                        label: const Text('Machine Name'),
-                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                      ),
-                      DataColumn(
-                        label: const Text('Status'),
-                        onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending),
-                      ),
-                      const DataColumn(label: Text('Details')),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return Center(child: CircularProgressIndicator());
+        } else if (controller.filteredAssessments.isEmpty) {
+          return Center(child: Text('No assessments found'));
+        } else {
+          return RefreshIndicator(
+            onRefresh: () async {
+              controller.fetchAssessments();
+              return Future<void>.value();
+            },
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SingleChildScrollView(
+                child: DataTable(
+                  columns: [
+                    DataColumn(label: const Text('ID'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: const Text('Shift'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: const Text('SOP Number'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: const Text('Assessment Date'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: const Text('Area'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: const Text('Sub Area'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: const Text('Machine ID'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: const Text('Machine Name'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: const Text('Machine Status'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    DataColumn(label: const Text('Model'), onSort: (columnIndex, ascending) => controller.sort(columnIndex, ascending)),
+                    const DataColumn(label: Text('Notes')),
+                  ],
+                  rows: controller.filteredAssessments.map((assessment) => DataRow(
+                    cells: [
+                      DataCell(Text(assessment.id.toString())),
+                      DataCell(Text(assessment.shift.toUpperCase())),
+                      DataCell(Text(assessment.sopNumber)),
+                      DataCell(Text(DateFormat('yyyy-MM-dd').format(assessment.assessmentDate))),
+                      DataCell(Text(assessment.subArea.area.name)),
+                      DataCell(Text(assessment.subArea.name)),
+                      DataCell(Text(assessment.machine.id)),
+                      DataCell(Text(assessment.machine.name)),
+                      DataCell(Text(assessment.machine.status.toUpperCase())),
+                      DataCell(Text(assessment.model.name)),
+                      DataCell(Text(assessment.notes ?? '')),
                     ],
-                    rows: controller.filteredAssessments.map((assessment) => DataRow(
-                      cells: [
-                        DataCell(Text(assessment.no.toString())),
-                        DataCell(Text(assessment.shift)),
-                        DataCell(Text(assessment.updatedTime)),
-                        DataCell(Text(assessment.area)),
-                        DataCell(Text(assessment.subArea)),
-                        DataCell(Text(assessment.sopNumber)),
-                        DataCell(Text(assessment.model)),
-                        DataCell(Text(assessment.machineCodeAsset)),
-                        DataCell(Text(assessment.machineName)),
-                        DataCell(Text(assessment.status)),
-                        DataCell(
-                          IconButton(
-                            icon: const Icon(Icons.info_outline),
-                            onPressed: () {
-                            Get.toNamed('/detail-history');
-                            },
-                          ),
-                        ),
-                      ],
-                    )).toList(),
-                  )),
+                    onSelectChanged: (selected) {
+                      if (selected == true) {
+                        Get.toNamed(Routes.DETAIL_HISTORY, arguments: assessment);
+                      }
+                    },
+                  )).toList(),
                 ),
               ),
-            ],
+            ),
           );
-        },
-      ),
+        }
+      }),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
             heroTag: 'add-ases',
             onPressed: () => Get.toNamed('/add-ases'),
-          child: const Icon(Icons.add),
+            child: const Icon(Icons.add),
           ),
           SizedBox(height: 16),
           FloatingActionButton(
             heroTag: 'qr-scanner',
-          onPressed: () => Get.toNamed('/qr-scan'),
-          child: const Icon(Icons.qr_code_scanner),
+            onPressed: () async {
+              final result = await Get.toNamed(Routes.QR_SCAN, arguments: true);
+              if (result != null) {
+                Get.toNamed(Routes.DETAIL_HISTORY, arguments: result);
+              }
+            },
+            child: const Icon(Icons.qr_code_scanner),
           ),
         ],
       ),
-      
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1,
         items: const [
@@ -165,63 +121,58 @@ class AsesmentView extends GetView<AsesmentController> {
       ),
     );
   }
-  void _showFilterDialog(BuildContext context) {
+
+  void _showDateRangeDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Filter'),
+          title: Text('Select Date Range'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ElevatedButton(
-                child: Text('Filter by Date'),
+                child: Text('Select Start Date'),
                 onPressed: () async {
                   final DateTime? picked = await showDatePicker(
                     context: context,
-                    initialDate: controller.selectedDate.value ?? DateTime.now(),
+                    initialDate: controller.startDate.value ?? DateTime.now(),
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2025),
                   );
                   if (picked != null) {
-                    controller.filterByDate(picked);
+                    controller.setStartDate(picked);
                   }
                 },
               ),
+              SizedBox(height: 10),
               ElevatedButton(
-                child: Text('Filter by Month'),
+                child: Text('Select End Date'),
                 onPressed: () async {
                   final DateTime? picked = await showDatePicker(
                     context: context,
-                    initialDate: controller.selectedMonth.value ?? DateTime.now(),
+                    initialDate: controller.endDate.value ?? DateTime.now(),
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2025),
                   );
                   if (picked != null) {
-                    controller.filterByMonth(DateTime(picked.year, picked.month));
+                    controller.setEndDate(picked);
                   }
                 },
               ),
+              SizedBox(height: 10),
               ElevatedButton(
-                child: Text('Filter by Year'),
-                onPressed: () async {
-                  final DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: controller.selectedYear.value ?? DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2025),
-                  );
-                  if (picked != null) {
-                    controller.filterByYear(DateTime(picked.year));
-                  }
-                },
-              ),
-              ElevatedButton(
-                child: Text('Clear Filters'),
+                child: Text('Apply Filter'),
                 onPressed: () {
-                  controller.filterByDate(null);
-                  controller.filterByMonth(null);
-                  controller.filterByYear(null);
+                  controller.applyDateFilter();
+                  Navigator.of(context).pop();
+                },
+              ),
+              SizedBox(height: 10),
+              ElevatedButton(
+                child: Text('Clear Filter'),
+                onPressed: () {
+                  controller.clearDateFilter();
                   Navigator.of(context).pop();
                 },
               ),
