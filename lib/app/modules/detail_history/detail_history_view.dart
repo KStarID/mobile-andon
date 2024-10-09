@@ -45,6 +45,7 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
         children: [
           FloatingActionButton(
             heroTag: 'update-ases',
+            backgroundColor: AppColors.primary100,
             onPressed: () {
               if (controller.assessment.value != null) {
                 Get.toNamed('/update-ases', arguments: controller.assessment.value);

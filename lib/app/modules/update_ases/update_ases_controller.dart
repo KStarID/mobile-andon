@@ -27,6 +27,9 @@ class UpdateAsesController extends GetxController {
 
   final assessment = Rx<Assessment?>(null);
 
+  final filteredSubAreas = <SubArea>[].obs;
+  final filteredModels = <Model>[].obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -46,7 +49,7 @@ class UpdateAsesController extends GetxController {
     try {
       final fetchedSubAreas = await _apiService.getSubAreas();
       subAreas.assignAll(fetchedSubAreas);
-      // Setelah mengambil subAreas, coba tetapkan selectedSubArea lagi
+      filteredSubAreas.assignAll(fetchedSubAreas);
       if (assessment.value != null) {
         selectedSubArea.value = subAreas.firstWhereOrNull((subArea) => subArea.id == assessment.value!.subArea.id);
       }
@@ -60,13 +63,31 @@ class UpdateAsesController extends GetxController {
     try {
       final fetchedModels = await _apiService.getModels();
       models.assignAll(fetchedModels);
-      // Setelah mengambil models, coba tetapkan selectedModel lagi
+      filteredModels.assignAll(fetchedModels);
       if (assessment.value != null) {
         selectedModel.value = models.firstWhereOrNull((model) => model.id == assessment.value!.model.id);
       }
     } catch (e) {
       print('Error fetching models: $e');
       Get.snackbar('Error', 'Failed to fetch models');
+    }
+  }
+
+  void filterSubAreas(String query) {
+    if (query.isEmpty) {
+      filteredSubAreas.assignAll(subAreas);
+    } else {
+      filteredSubAreas.assignAll(subAreas.where((subArea) =>
+          subArea.name.toLowerCase().contains(query.toLowerCase())));
+    }
+  }
+
+  void filterModels(String query) {
+    if (query.isEmpty) {
+      filteredModels.assignAll(models);
+    } else {
+      filteredModels.assignAll(models.where((model) =>
+          model.name.toLowerCase().contains(query.toLowerCase())));
     }
   }
 

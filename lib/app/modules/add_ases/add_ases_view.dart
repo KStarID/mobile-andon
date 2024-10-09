@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../utils/app_colors.dart';
-import '../../data/models/assessment_model.dart';
 import 'add_ases_controller.dart';
+import '../../data/models/assessment_model.dart';
 
 class AddAsesView extends GetView<AddAsesController> {
   const AddAsesView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Assessment'),
@@ -23,7 +22,7 @@ class AddAsesView extends GetView<AddAsesController> {
             children: [
               Obx(() => DropdownButtonFormField<String>(
                 value: controller.selectedShiftId.value,
-                decoration: const InputDecoration(labelText: 'Shift'),
+                decoration: InputDecoration(label: Text('Shift', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
                 items: controller.shifts.map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -32,58 +31,60 @@ class AddAsesView extends GetView<AddAsesController> {
                 }).toList(),
                 onChanged: controller.updateShift,
               )),
+              SizedBox(height: 20),
 
-              Obx(() => DropdownButtonFormField<int>(
-                value: controller.selectedSubAreaId.value,
-                decoration: const InputDecoration(labelText: 'Sub Area'),
-                items: controller.subAreas.map((SubArea subArea) {
-                  return DropdownMenuItem<int>(
-                    value: subArea.id,
-                    child: Text(subArea.name),
-                  );
-                }).toList(),
+              Obx(() => SearchableDropdown<SubArea>(
+                label: 'Sub Area',
+                searchHint: 'Search Sub Area',
+                items: controller.subAreas,
+                selectedValue: controller.selectedSubArea.value,
                 onChanged: controller.updateSubArea,
+                itemBuilder: (subArea) => Text(subArea.name),
+                valueExtractor: (subArea) => subArea,
               )),
 
-              Obx(() => DropdownButtonFormField<int>(
-                value: controller.selectedModelId.value,
-                decoration: const InputDecoration(labelText: 'Model'),
-                items: controller.models.map((Model model) {
-                  return DropdownMenuItem<int>(
-                    value: model.id,
-                    child: Text(model.name),
-                  );
-                }).toList(),
+              Obx(() => SearchableDropdown<Model>(
+                label: 'Model',
+                searchHint: 'Search Model',
+                items: controller.models,
+                selectedValue: controller.selectedModel.value,
                 onChanged: controller.updateModel,
+                itemBuilder: (model) => Text(model.name),
+                valueExtractor: (model) => model,
               )),
 
               TextField(
                 controller: controller.sopNumberController,
-                decoration: const InputDecoration(labelText: 'SOP Number'),
+                decoration: InputDecoration(label: Text('SOP Number', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
               ),
+              SizedBox(height: 10),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: controller.machineCodeAssetController,
-                      decoration: const InputDecoration(labelText: 'Machine Code Asset'),
+                      decoration: InputDecoration(label: Text('Machine Code Asset', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
                       onEditingComplete: controller.fetchMachineDetails,
+                      enabled: false,
                     ),
                   ),
                   IconButton(
                     icon: Icon(Icons.qr_code_scanner),
+                    iconSize: 50,
                     onPressed: controller.scanQRCode,
                   ),
                 ],
               ),
+              SizedBox(height: 10),
               Obx(() => TextField(
                 controller: TextEditingController(text: controller.machineName.value),
-                decoration: const InputDecoration(labelText: 'Machine Name'),
+                decoration: InputDecoration(label: Text('Machine Name', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
                 enabled: false,
               )),
+              SizedBox(height: 10),
               Obx(() => DropdownButtonFormField<String>(
                 value: controller.machineStatus.value,
-                decoration: const InputDecoration(labelText: 'Machine Status'),
+                decoration: InputDecoration(label: Text('Machine Status', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
                 items: controller.machineStatusOptions.map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -93,22 +94,31 @@ class AddAsesView extends GetView<AddAsesController> {
                 onChanged: controller.updateMachineStatus,
                 hint: Text('Select machine status'),
               )),
+              SizedBox(height: 10),
               TextField(
                 controller: controller.detailsController,
-                decoration: const InputDecoration(labelText: 'Remarks'),
+                decoration: InputDecoration(label: Text('Remarks', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
                 maxLines: 3,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
                     onPressed: controller.addAssessment,
-                    child: const Text('Add Assessment'),
+                    child: Text('Add Assessment', style: TextStyle(color: Colors.black)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary100,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
                   ),
                   ElevatedButton(
                     onPressed: controller.clearForm,
-                    child: const Text('Clear Form'),
+                    child: Text('Clear Form', style: TextStyle(color: Colors.black)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary100,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
                   ),
                 ],
               ),
@@ -116,6 +126,185 @@ class AddAsesView extends GetView<AddAsesController> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class SearchableDropdown<T> extends StatefulWidget {
+  final String label;
+  final String searchHint;
+  final List<dynamic> items;
+  final T? selectedValue;
+  final Function(T?) onChanged;
+  final Widget Function(dynamic) itemBuilder;
+  final T Function(dynamic) valueExtractor;
+
+  const SearchableDropdown({
+    Key? key,
+    required this.label,
+    required this.searchHint,
+    required this.items,
+    required this.selectedValue,
+    required this.onChanged,
+    required this.itemBuilder,
+    required this.valueExtractor,
+  }) : super(key: key);
+
+  @override
+  _SearchableDropdownState<T> createState() => _SearchableDropdownState<T>();
+}
+
+class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
+  final LayerLink _layerLink = LayerLink();
+  OverlayEntry? _overlayEntry;
+  bool _isOpen = false;
+  final _searchController = TextEditingController();
+  final _focusNode = FocusNode();
+  late List<dynamic> _filteredItems;
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredItems = widget.items;
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        _closeDropdown();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _overlayEntry?.remove();
+    _searchController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _toggleDropdown() {
+    if (_isOpen) {
+      _closeDropdown();
+    } else {
+      _openDropdown();
+    }
+    setState(() {
+      _isOpen = !_isOpen;
+    });
+  }
+
+  void _openDropdown() {
+    _overlayEntry = _createOverlayEntry();
+    Overlay.of(context).insert(_overlayEntry!);
+    _searchController.clear();
+    _filteredItems = widget.items;
+  }
+
+  void _closeDropdown() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  OverlayEntry _createOverlayEntry() {
+    RenderBox renderBox = context.findRenderObject() as RenderBox;
+    var size = renderBox.size;
+
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        width: size.width,
+        child: CompositedTransformFollower(
+          link: _layerLink,
+          showWhenUnlinked: false,
+          offset: Offset(0.0, size.height + 5.0),
+          child: Material(
+            elevation: 4.0,
+            child: Container(
+              height: 200,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: widget.searchHint,
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _filteredItems = widget.items
+                              .where((item) => widget
+                                  .itemBuilder(item)
+                                  .toString()
+                                  .toLowerCase()
+                                  .contains(value.toLowerCase()))
+                              .toList();
+                        });
+                        _overlayEntry?.markNeedsBuild();
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      children: _filteredItems.map((item) => ListTile(
+                        title: widget.itemBuilder(item),
+                        onTap: () {
+                          widget.onChanged(widget.valueExtractor(item));
+                          _closeDropdown();
+                          setState(() {
+                            _isOpen = false;
+                          });
+                        },
+                      )).toList(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(widget.label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        SizedBox(height: 8),
+        CompositedTransformTarget(
+          link: _layerLink,
+          child: GestureDetector(
+            onTap: _toggleDropdown,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.selectedValue != null
+                          ? widget.itemBuilder(widget.selectedValue as dynamic).toString()
+                          : 'Select ${widget.label}',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  Icon(Icons.arrow_drop_down),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 16),
+      ],
     );
   }
 }

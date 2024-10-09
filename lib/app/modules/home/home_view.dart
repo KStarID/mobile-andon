@@ -14,10 +14,9 @@ class HomeView extends GetView<HomeController> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Hello, ${controller.username.value ?? "User"}'),
             Expanded(
               child: Center(
-                child: Text('Dashboard'),
+                child: Text('Dashboard', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 35)),
               ),
             ),
             IconButton(
@@ -46,6 +45,14 @@ class HomeView extends GetView<HomeController> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Hello, ${controller.username.value ?? "User"}',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 _buildChartCard('Downtime/OK', _buildLineChart(controller.getDowntimeData()), controller.downtimeMonth),
                 const SizedBox(height: 16),
                 _buildChartCard('Machine Status', _buildPieChart(), controller.machineStatusMonth),
@@ -59,10 +66,12 @@ class HomeView extends GetView<HomeController> {
         );
       }),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0, // Indeks untuk halaman home
+        currentIndex: 0,
+        selectedItemColor: AppColors.primary400,
+        unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.dashboard),
             label: 'Dashboard',
           ),
           BottomNavigationBarItem(

@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../../data/models/assessment_model.dart';
 import '../../services/service.dart';
 
@@ -8,8 +9,43 @@ class AsesmentController extends GetxController {
   final filteredAssessments = <Assessment>[].obs;
   final isLoading = true.obs;
   final error = Rx<String?>(null);
-  final sortColumnIndex = 0.obs;
-  final isAscending = true.obs;
+  final sortColumnIndex = Rx<int?>(null); 
+  final isAscending = RxBool(true);
+  final selectedYear = DateTime.now().year.obs;
+  final selectedMonth = DateTime.now().month.obs;
+  final selectedYearString = RxString(DateTime.now().year.toString());
+  final selectedMonthString = RxString(DateFormat('MMMM').format(DateTime.now()));
+
+  final itemsPerPage = 10;
+  final currentPage = 1.obs;
+  final totalPages = 1.obs;
+
+  List<Assessment> get paginatedAssessments {
+    final startIndex = (currentPage.value - 1) * itemsPerPage;
+    final endIndex = startIndex + itemsPerPage;
+    return filteredAssessments.sublist(
+      startIndex,
+      endIndex > filteredAssessments.length ? filteredAssessments.length : endIndex,
+    );
+  }
+
+  void nextPage() {
+    if (currentPage.value < totalPages.value) {
+      currentPage.value++;
+    }
+  }
+
+  void previousPage() {
+    if (currentPage.value > 1) {
+      currentPage.value--;
+    }
+  }
+
+  void goToPage(int page) {
+    if (page >= 1 && page <= totalPages.value) {
+      currentPage.value = page;
+    }
+  }
 
   @override
   void onInit() {
@@ -88,19 +124,6 @@ class AsesmentController extends GetxController {
     endDate.value = date;
   }
 
-  void applyDateFilter() {
-    if (startDate.value != null && endDate.value != null) {
-      filteredAssessments.value = assessments.where((assessment) {
-        return assessment.assessmentDate.isAfter(startDate.value!) && 
-               assessment.assessmentDate.isBefore(endDate.value!.add(Duration(days: 1)));
-      }).toList();
-    } else {
-      filteredAssessments.value = assessments;
-    }
-    print('Applied date filter. Filtered assessments: ${filteredAssessments.length}');
-    _sort();
-  }
-
   void clearDateFilter() {
     startDate.value = null;
     endDate.value = null;
@@ -115,30 +138,24 @@ class AsesmentController extends GetxController {
   }
 
   void _sort() {
+    if (sortColumnIndex.value == null) return; // Jangan urutkan jika tidak ada kolom yang dipilih
+
     filteredAssessments.sort((a, b) {
       switch (sortColumnIndex.value) {
-        case 0:
-          return isAscending.value ? a.id.compareTo(b.id) : b.id.compareTo(a.id);
-        case 1:
-          return isAscending.value ? a.shift.compareTo(b.shift) : b.shift.compareTo(a.shift);
-        case 2:
-          return isAscending.value ? a.sopNumber.compareTo(b.sopNumber) : b.sopNumber.compareTo(a.sopNumber);
-        case 3:
-          return isAscending.value ? a.assessmentDate.compareTo(b.assessmentDate) : b.assessmentDate.compareTo(a.assessmentDate);
-        case 4:
-          return isAscending.value ? a.subArea.name.compareTo(b.subArea.name) : b.subArea.name.compareTo(a.subArea.name);
-        case 5:
-          return isAscending.value ? a.machine.id.compareTo(b.machine.id) : b.machine.id.compareTo(a.machine.id);
-        case 6:
-          return isAscending.value ? a.machine.name.compareTo(b.machine.name) : b.machine.name.compareTo(a.machine.name);
-        case 7:
-          return isAscending.value ? a.machine.status.compareTo(b.machine.status) : b.machine.status.compareTo(a.machine.status);
-        case 8:
-          return isAscending.value ? a.model.name.compareTo(b.model.name) : b.model.name.compareTo(a.model.name);
+        case 1: // Shift
+          final shiftOrder = {'day': 0, 'night': 1};
+          final aShift = a.shift.toLowerCase();
+          final bShift = b.shift.toLowerCase();
+          final comparison = shiftOrder[aShift]!.compareTo(shiftOrder[bShift]!);
+          return isAscending.value ? comparison : -comparison;
+        case 2: // Updated Time
+          final comparison = a.assessmentDate.compareTo(b.assessmentDate);
+          return isAscending.value ? comparison : -comparison;
         default:
           return 0;
       }
     });
+    filteredAssessments.refresh();
   }
 
   void updateAssessmentList(Assessment updatedAssessment) {
@@ -147,5 +164,48 @@ class AsesmentController extends GetxController {
       assessments[index] = updatedAssessment;
       assessments.refresh();
     }
+  }
+
+  void setSelectedYear(int year) {
+    selectedYear.value = year;
+    selectedYearString.value = year.toString();
+    applyDateFilter();
+  }
+
+  void setSelectedMonth(int month) {
+    selectedMonth.value = month;
+    selectedMonthString.value = DateFormat('MMMM').format(DateTime(2022, month));
+    applyDateFilter();
+  }
+
+  void applyDateFilter() {
+    filteredAssessments.value = assessments.where((assessment) {
+      return assessment.assessmentDate.year == selectedYear.value &&
+             assessment.assessmentDate.month == selectedMonth.value;
+    }).toList();
+    _sort();
+    updatePagination();
+  }
+
+  void updatePagination() {
+    totalPages.value = (filteredAssessments.length / itemsPerPage).ceil();
+    currentPage.value = 1;
+  }
+
+  // Tambahkan metode ini untuk mendapatkan daftar tahun
+  List<int> getYearList() {
+    final currentYear = DateTime.now().year;
+    return List.generate(5, (index) => currentYear - 2 + index);
+  }
+
+  // Tambahkan metode ini untuk mendapatkan daftar bulan
+  List<Map<String, dynamic>> getMonthList() {
+    return List.generate(12, (index) {
+      final month = index + 1;
+      return {
+        'value': month,
+        'label': DateFormat('MMMM').format(DateTime(2022, month)),
+      };
+    });
   }
 }

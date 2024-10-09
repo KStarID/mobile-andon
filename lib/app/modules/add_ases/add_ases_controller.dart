@@ -16,18 +16,26 @@ class AddAsesController extends GetxController {
   final machineCodeAssetController = TextEditingController();
   final detailsController = TextEditingController();
 
-  final selectedShiftId = RxnString();
-  final selectedSubAreaId = RxnInt();
-  final selectedModelId = RxnInt();
+  final selectedShiftId = Rx<String?>(null);
+  final selectedSubAreaId = Rxn<int>();
+  final selectedModelId = Rxn<int>();
   final selectedMachineId = RxnString();
 
   final shifts = ['Day', 'Night'];
   final subAreas = <SubArea>[].obs;
+  final filteredSubAreas = <SubArea>[].obs;
   final models = <Model>[].obs;
+  final filteredModels = <Model>[].obs;
 
   final machineName = ''.obs;
   final machineStatus = Rx<String?>(null);
   final machineStatusOptions = ['ok', 'ng', 'repairing'];
+
+  final subAreaSearchController = TextEditingController();
+  final modelSearchController = TextEditingController();
+
+  final selectedSubArea = Rx<SubArea?>(null);
+  final selectedModel = Rx<Model?>(null);
 
   @override
   void onInit() async {
@@ -38,6 +46,8 @@ class AddAsesController extends GetxController {
     await fetchSubAreas();
     await fetchModels();
     loadSavedData();
+    filteredSubAreas.assignAll(subAreas);
+    filteredModels.assignAll(models);
   }
 
   Future<void> fetchSubAreas() async {
@@ -65,13 +75,15 @@ class AddAsesController extends GetxController {
     saveData();
   }
 
-  void updateSubArea(int? newValue) {
-    selectedSubAreaId.value = newValue;
+  void updateSubArea(SubArea? newValue) {
+    selectedSubArea.value = newValue;
+    selectedSubAreaId.value = newValue?.id;
     saveData();
   }
 
-  void updateModel(int? newValue) {
-    selectedModelId.value = newValue;
+  void updateModel(Model? newValue) {
+    selectedModel.value = newValue;
+    selectedModelId.value = newValue?.id;
     saveData();
   }
 
@@ -201,11 +213,31 @@ class AddAsesController extends GetxController {
     detailsController.text = prefs.getString('details') ?? '';
   }
 
+  void filterSubAreas(String query) {
+    if (query.isEmpty) {
+      filteredSubAreas.assignAll(subAreas);
+    } else {
+      filteredSubAreas.assignAll(subAreas.where((subArea) =>
+          subArea.name.toLowerCase().contains(query.toLowerCase())));
+    }
+  }
+
+  void filterModels(String query) {
+    if (query.isEmpty) {
+      filteredModels.assignAll(models);
+    } else {
+      filteredModels.assignAll(models.where((model) =>
+          model.name.toLowerCase().contains(query.toLowerCase())));
+    }
+  }
+
   @override
   void onClose() {
     sopNumberController.dispose();
     machineCodeAssetController.dispose();
     detailsController.dispose();
+    subAreaSearchController.dispose();
+    modelSearchController.dispose();
     super.onClose();
   }
 }
