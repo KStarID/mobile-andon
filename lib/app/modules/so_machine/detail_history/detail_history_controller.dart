@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import '../../data/models/assessment_model.dart';
-import '../../services/service.dart';
+import '../../../data/models/assessment_model.dart';
+import '../../../services/service.dart';
 
 class DetailHistoryController extends GetxController {
   late final ApiService _apiService;

@@ -1,21 +1,23 @@
 import 'package:get/get.dart';
 
-import '../modules/add_ases/add_ases_binding.dart';
-import '../modules/add_ases/add_ases_view.dart';
-import '../modules/asesment/asesment_binding.dart';
-import '../modules/asesment/asesment_view.dart';
-import '../modules/detail_history/detail_history_binding.dart';
-import '../modules/detail_history/detail_history_view.dart';
+import '../modules/andon_home/andon_home_binding.dart';
+import '../modules/andon_home/andon_home_view.dart';
 import '../modules/home/home_binding.dart';
 import '../modules/home/home_view.dart';
 import '../modules/login_page/login_page_binding.dart';
 import '../modules/login_page/login_page_view.dart';
-import '../modules/qr_scan/qr_scan_binding.dart';
-import '../modules/qr_scan/qr_scan_view.dart';
+import '../modules/so_machine/add_ases/add_ases_binding.dart';
+import '../modules/so_machine/add_ases/add_ases_view.dart';
+import '../modules/so_machine/asesment/asesment_binding.dart';
+import '../modules/so_machine/asesment/asesment_view.dart';
+import '../modules/so_machine/detail_history/detail_history_binding.dart';
+import '../modules/so_machine/detail_history/detail_history_view.dart';
+import '../modules/so_machine/qr_scan/qr_scan_binding.dart';
+import '../modules/so_machine/qr_scan/qr_scan_view.dart';
+import '../modules/so_machine/update_ases/update_ases_binding.dart';
+import '../modules/so_machine/update_ases/update_ases_view.dart';
 import '../modules/splash_screen/splash_screen_binding.dart';
 import '../modules/splash_screen/splash_screen_view.dart';
-import '../modules/update_ases/update_ases_binding.dart';
-import '../modules/update_ases/update_ases_view.dart';
 
 part 'app_routes.dart';
 
@@ -64,6 +66,11 @@ class AppPages {
       name: _Paths.UPDATE_ASES,
       page: () => const UpdateAsesView(),
       binding: UpdateAsesBinding(),
+    ),
+    GetPage(
+      name: _Paths.ANDON_HOME,
+      page: () => const AndonHomeView(),
+      binding: AndonHomeBinding(),
     ),
   ];
 }

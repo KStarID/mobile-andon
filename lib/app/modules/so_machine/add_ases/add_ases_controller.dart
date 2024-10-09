@@ -2,10 +2,10 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../data/models/assessment_model.dart';
-import '../../routes/app_pages.dart';
+import '../../../data/models/assessment_model.dart';
+import '../../../routes/app_pages.dart';
 import '../asesment/asesment_controller.dart';
-import '../../services/service.dart';
+import '../../../services/service.dart';
 
 class AddAsesController extends GetxController {
   late ApiService _apiService;

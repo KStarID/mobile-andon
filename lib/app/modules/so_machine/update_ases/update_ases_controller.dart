@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import '../../data/models/assessment_model.dart';
-import '../../services/service.dart';
-import '../../services/user_service.dart';
+import '../../../data/models/assessment_model.dart';
+import '../../../services/service.dart';
+import '../../../services/user_service.dart';
 import '../asesment/asesment_controller.dart';
 
 class UpdateAsesController extends GetxController {

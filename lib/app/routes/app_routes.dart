@@ -11,6 +11,7 @@ abstract class Routes {
   static const DETAIL_HISTORY = _Paths.DETAIL_HISTORY;
   static const SPLASH_SCREEN = _Paths.SPLASH_SCREEN;
   static const UPDATE_ASES = _Paths.UPDATE_ASES;
+  static const ANDON_HOME = _Paths.ANDON_HOME;
 }
 
 abstract class _Paths {
@@ -23,4 +24,5 @@ abstract class _Paths {
   static const DETAIL_HISTORY = '/detail-history';
   static const SPLASH_SCREEN = '/splash-screen';
   static const UPDATE_ASES = '/update-ases';
+  static const ANDON_HOME = '/andon-home';
 }

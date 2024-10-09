@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../utils/app_colors.dart';
-import '../../data/models/assessment_model.dart';
+import '../../../../utils/app_colors.dart';
+import '../../../data/models/assessment_model.dart';
 import 'update_ases_controller.dart';
 
 class UpdateAsesView extends GetView<UpdateAsesController> {
@@ -32,13 +32,7 @@ class UpdateAsesView extends GetView<UpdateAsesController> {
                   items: controller.shifts.map((shift) => DropdownMenuItem(value: shift, child: Text(shift))).toList(),
                   decoration: InputDecoration(label: Text('Shift', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
                 )),
-                SizedBox(height: 20),
-
-                TextFormField(
-                  controller: controller.sopNumberController,
-                  decoration: InputDecoration(label: Text('SOP Number', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
-                ),
-                SizedBox(height: 20),
+                SizedBox(height: 15),
 
                 SearchableDropdown<SubArea>(
                   label: 'Sub Area',
@@ -47,8 +41,14 @@ class UpdateAsesView extends GetView<UpdateAsesController> {
                   selectedValue: controller.selectedSubArea.value,
                   onChanged: controller.updateSubArea,
                   itemBuilder: (subArea) => Text(subArea.name),
-                  valueExtractor: (subArea) => subArea,
+                  displayStringForOption: (subArea) => subArea.name,
                 ),
+
+                TextFormField(
+                  controller: controller.sopNumberController,
+                  decoration: InputDecoration(label: Text('SOP Number', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
+                ),
+                SizedBox(height: 20),
 
                 SearchableDropdown<Model>(
                   label: 'Model',
@@ -57,7 +57,7 @@ class UpdateAsesView extends GetView<UpdateAsesController> {
                   selectedValue: controller.selectedModel.value,
                   onChanged: controller.updateModel,
                   itemBuilder: (model) => Text(model.name),
-                  valueExtractor: (model) => model,
+                  displayStringForOption: (model) => model.name,
                 ),
 
                 TextFormField(
@@ -101,11 +101,11 @@ class UpdateAsesView extends GetView<UpdateAsesController> {
 class SearchableDropdown<T> extends StatefulWidget {
   final String label;
   final String searchHint;
-  final List<dynamic> items;
+  final List<T> items;
   final T? selectedValue;
   final Function(T?) onChanged;
-  final Widget Function(dynamic) itemBuilder;
-  final T Function(dynamic) valueExtractor;
+  final Widget Function(T) itemBuilder;
+  final String Function(T) displayStringForOption;
 
   const SearchableDropdown({
     Key? key,
@@ -115,7 +115,7 @@ class SearchableDropdown<T> extends StatefulWidget {
     required this.selectedValue,
     required this.onChanged,
     required this.itemBuilder,
-    required this.valueExtractor,
+    required this.displayStringForOption,
   }) : super(key: key);
 
   @override
@@ -128,7 +128,7 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
   bool _isOpen = false;
   final _searchController = TextEditingController();
   final _focusNode = FocusNode();
-  late List<dynamic> _filteredItems;
+  late List<T> _filteredItems;
 
   @override
   void initState() {
@@ -202,8 +202,7 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                         setState(() {
                           _filteredItems = widget.items
                               .where((item) => widget
-                                  .itemBuilder(item)
-                                  .toString()
+                                  .displayStringForOption(item)
                                   .toLowerCase()
                                   .contains(value.toLowerCase()))
                               .toList();
@@ -219,7 +218,7 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                       children: _filteredItems.map((item) => ListTile(
                         title: widget.itemBuilder(item),
                         onTap: () {
-                          widget.onChanged(widget.valueExtractor(item));
+                          widget.onChanged(item);
                           _closeDropdown();
                           setState(() {
                             _isOpen = false;
@@ -260,9 +259,7 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                   Expanded(
                     child: Text(
                       widget.selectedValue != null
-                          ? widget.itemBuilder(widget.items.firstWhere(
-                              (item) => widget.valueExtractor(item) == widget.selectedValue))
-                              .toString()
+                          ? widget.displayStringForOption(widget.selectedValue as T)
                           : 'Select ${widget.label}',
                       style: TextStyle(fontSize: 16),
                     ),

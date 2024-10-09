@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../utils/app_colors.dart';
-import '../../routes/app_pages.dart';
+import '../../../../utils/app_colors.dart';
+import '../../../routes/app_pages.dart';
 import 'asesment_controller.dart';
 import 'package:intl/intl.dart';
 
@@ -238,7 +238,7 @@ class AsesmentView extends GetView<AsesmentController> {
         FloatingActionButton(
           heroTag: 'add-ases',
           onPressed: () => Get.toNamed('/add-ases'),
-          child: const Icon(Icons.add, size: 32),
+          child: const Icon(Icons.add, size: 40),
           backgroundColor: AppColors.primary100,
         ),
         const SizedBox(height: 16),
@@ -250,7 +250,7 @@ class AsesmentView extends GetView<AsesmentController> {
               Get.toNamed(Routes.DETAIL_HISTORY, arguments: result);
             }
           },
-          child: const Icon(Icons.qr_code_scanner, size: 32),
+          child: const Icon(Icons.qr_code_scanner, size: 40),
           backgroundColor: AppColors.primary100,
         ),
         const SizedBox(height: 16),
@@ -272,10 +272,20 @@ class AsesmentView extends GetView<AsesmentController> {
           icon: Icon(Icons.assessment),
           label: 'Assessment',
         ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.notification_important),
+          label: 'Andon System',
+        ),
       ],
       onTap: (index) {
         if (index == 0) {
           Get.offAllNamed('/home');
+        } 
+        else if (index == 1) {
+          Get.offAllNamed('/asesment');
+        }
+        else if (index == 2) {
+          Get.offAllNamed('/andon-home');
         }
       },
     );
@@ -286,38 +296,46 @@ class AsesmentView extends GetView<AsesmentController> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Pilih Tahun dan Bulan'),
+          title: Text('Choose Year and Month'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              DropdownButton<int>(
-                value: controller.selectedYear.value,
-                items: List.generate(5, (index) => DateTime.now().year + index).map((year) {
-                  return DropdownMenuItem<int>(
-                    value: year,
-                    child: Text(year.toString()),
-                  );
-                }).toList(),
-                onChanged: (year) {
-                  if (year != null) controller.setSelectedYear(year);
-                },
+              Container(
+                width: double.maxFinite,
+                child: DropdownButton<int>(
+                  isExpanded: true,
+                  value: controller.selectedYear.value,
+                  items: List.generate(5, (index) => DateTime.now().year + index).map((year) {
+                    return DropdownMenuItem<int>(
+                      value: year,
+                      child: Text(year.toString()),
+                    );
+                  }).toList(),
+                  onChanged: (year) {
+                    if (year != null) controller.setSelectedYear(year);
+                  },
+                ),
               ),
               SizedBox(height: 10),
-              DropdownButton<int>(
-                value: controller.selectedMonth.value,
-                items: List.generate(12, (index) => index + 1).map((month) {
-                  return DropdownMenuItem<int>(
-                    value: month,
-                    child: Text(DateFormat('MMMM').format(DateTime(2022, month))),
-                  );
-                }).toList(),
-                onChanged: (month) {
-                  if (month != null) controller.setSelectedMonth(month);
-                },
+              Container(
+                width: double.maxFinite,
+                child: DropdownButton<int>(
+                  isExpanded: true,
+                  value: controller.selectedMonth.value,
+                  items: List.generate(12, (index) => index + 1).map((month) {
+                    return DropdownMenuItem<int>(
+                      value: month,
+                      child: Text(DateFormat('MMMM').format(DateTime(2022, month))),
+                    );
+                  }).toList(),
+                  onChanged: (month) {
+                    if (month != null) controller.setSelectedMonth(month);
+                  },
+                ),
               ),
               SizedBox(height: 10),
               ElevatedButton(
-                child: Text('Terapkan Filter'),
+                child: Text('Apply Filter'),
                 onPressed: () {
                   controller.applyDateFilter();
                   Navigator.of(context).pop();

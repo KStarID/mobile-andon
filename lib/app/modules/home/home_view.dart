@@ -11,24 +11,18 @@ class HomeView extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Center(
-                child: Text('Dashboard', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 35)),
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () {
-                // Implementasi logika logout di sini
-                Get.offAllNamed('/splash-screen');
-              },
-            ),
-          ],
-        ),
+        title: const Text('Dashboard', style: TextStyle(fontWeight: FontWeight.bold)),
+        centerTitle: true,
         backgroundColor: AppColors.primary100,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              Get.offAllNamed('/splash-screen');
+            },
+          ),
+        ],
       ),
       body: FutureBuilder(
         future: Future.delayed(Duration(seconds: 2)),
@@ -78,11 +72,18 @@ class HomeView extends GetView<HomeController> {
             icon: Icon(Icons.assessment),
             label: 'Assessment',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notification_important),
+            label: 'Andon System',
+          ),
         ],
         onTap: (index) {
-          if (index == 1) {
-            // Navigasi ke halaman asesmen
+          if (index == 0) {
+            Get.offAllNamed('/home');
+          } else if (index == 1) {
             Get.offAllNamed('/asesment');
+          } else if (index == 2) {
+            Get.offAllNamed('/andon-home');
           }
         },
       ),

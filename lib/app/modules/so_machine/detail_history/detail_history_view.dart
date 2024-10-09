@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../utils/app_colors.dart';
+import '../../../../utils/app_colors.dart';
 import 'detail_history_controller.dart';
 import 'package:intl/intl.dart';
 
@@ -11,7 +11,7 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Detail Assessment'),
+        title: const Text('Detail Assessment', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: AppColors.primary100,
       ),
@@ -31,7 +31,7 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
               Center(
                 child: Text(
                   'History Movements',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
                 ),
               ),
               SizedBox(height: 16),
@@ -74,14 +74,14 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
           children: [
             _buildDetailItem('Submitted by', assessment.user.username),
             _buildDetailItem('Shift', assessment.shift),
-            _buildDetailItem('Sub Area', assessment.subArea.name),
+            _buildDetailItem('Updated Time', DateFormat('yyyy-MM-dd HH:mm:ss').format(assessment.assessmentDate)),
             _buildDetailItem('Area', assessment.subArea.area.name),
+            _buildDetailItem('Sub Area', assessment.subArea.name),
             _buildDetailItem('SOP Number', assessment.sopNumber),
             _buildDetailItem('Model', assessment.model.name),
-            _buildDetailItem('Machine Code', assessment.machine.id),
-            _buildDetailItem('Machine Name', assessment.machine.name),
-            _buildDetailItem('Machine Status', assessment.machine.status),
-            _buildDetailItem('Assess Date', DateFormat('yyyy-MM-dd HH:mm:ss').format(assessment.assessmentDate)),
+            _buildDetailItem('M/C Code', assessment.machine.id),
+            _buildDetailItem('M/C Name', assessment.machine.name),
+            _buildDetailItem('M/C Status', assessment.machine.status),
             _buildDetailItem('Remarks', assessment.notes ?? 'No notes'),
           ],
         ),
@@ -130,7 +130,7 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
                 ),
                 SizedBox(height: 8),
                 _buildHistoryItem('Submitted By', assessment.user.username),
-                _buildHistoryItem('Assess Date', DateFormat('yyyy-MM-dd HH:mm:ss').format(assessment.assessmentDate)),
+                _buildHistoryItem('Updated Time', DateFormat('yyyy-MM-dd HH:mm:ss').format(assessment.assessmentDate)),
                 _buildHistoryItem('Area', assessment.subArea.area.name),
                 _buildHistoryItem('SubArea', assessment.subArea.name),
                 _buildHistoryItem('Status', assessment.machine.status),

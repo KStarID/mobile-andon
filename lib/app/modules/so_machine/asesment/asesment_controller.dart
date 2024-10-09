@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import '../../data/models/assessment_model.dart';
-import '../../services/service.dart';
+import '../../../data/models/assessment_model.dart';
+import '../../../services/service.dart';
 
 class AsesmentController extends GetxController {
   late final ApiService _apiService;

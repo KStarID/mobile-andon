@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../utils/app_colors.dart';
+import '../../../../utils/app_colors.dart';
 import 'add_ases_controller.dart';
-import '../../data/models/assessment_model.dart';
+import '../../../data/models/assessment_model.dart';
 
 class AddAsesView extends GetView<AddAsesController> {
   const AddAsesView({Key? key}) : super(key: key);
@@ -11,7 +11,7 @@ class AddAsesView extends GetView<AddAsesController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Assessment'),
+        title: const Text('Add Assessment', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: AppColors.primary100,
       ),
@@ -40,8 +40,14 @@ class AddAsesView extends GetView<AddAsesController> {
                 selectedValue: controller.selectedSubArea.value,
                 onChanged: controller.updateSubArea,
                 itemBuilder: (subArea) => Text(subArea.name),
-                valueExtractor: (subArea) => subArea,
+                displayStringForOption: (subArea) => subArea.name,
               )),
+
+              TextField(
+                controller: controller.sopNumberController,
+                decoration: InputDecoration(label: Text('SOP Number', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
+              ),
+              SizedBox(height: 15),
 
               Obx(() => SearchableDropdown<Model>(
                 label: 'Model',
@@ -50,14 +56,9 @@ class AddAsesView extends GetView<AddAsesController> {
                 selectedValue: controller.selectedModel.value,
                 onChanged: controller.updateModel,
                 itemBuilder: (model) => Text(model.name),
-                valueExtractor: (model) => model,
+                displayStringForOption: (model) => model.name,
               )),
 
-              TextField(
-                controller: controller.sopNumberController,
-                decoration: InputDecoration(label: Text('SOP Number', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
-              ),
-              SizedBox(height: 10),
               Row(
                 children: [
                   Expanded(
@@ -133,11 +134,11 @@ class AddAsesView extends GetView<AddAsesController> {
 class SearchableDropdown<T> extends StatefulWidget {
   final String label;
   final String searchHint;
-  final List<dynamic> items;
+  final List<T> items;
   final T? selectedValue;
   final Function(T?) onChanged;
-  final Widget Function(dynamic) itemBuilder;
-  final T Function(dynamic) valueExtractor;
+  final Widget Function(T) itemBuilder;
+  final String Function(T) displayStringForOption;
 
   const SearchableDropdown({
     Key? key,
@@ -147,7 +148,7 @@ class SearchableDropdown<T> extends StatefulWidget {
     required this.selectedValue,
     required this.onChanged,
     required this.itemBuilder,
-    required this.valueExtractor,
+    required this.displayStringForOption,
   }) : super(key: key);
 
   @override
@@ -249,9 +250,9 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                       padding: EdgeInsets.zero,
                       shrinkWrap: true,
                       children: _filteredItems.map((item) => ListTile(
-                        title: widget.itemBuilder(item),
+                        title: widget.itemBuilder(item as T),
                         onTap: () {
-                          widget.onChanged(widget.valueExtractor(item));
+                          widget.onChanged(item as T);
                           _closeDropdown();
                           setState(() {
                             _isOpen = false;
@@ -292,7 +293,7 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                   Expanded(
                     child: Text(
                       widget.selectedValue != null
-                          ? widget.itemBuilder(widget.selectedValue as dynamic).toString()
+                          ? widget.displayStringForOption(widget.selectedValue as T)
                           : 'Select ${widget.label}',
                       style: TextStyle(fontSize: 16),
                     ),
