@@ -1,3 +1,4 @@
+import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:oppoandon/app/services/service.dart';
@@ -50,6 +51,7 @@ class HomeController extends GetxController {
 
   Future<void> loadUserData() async {
     try {
+      await Alarm.init();
       await _apiService.getCurrentUser();
       name.value = _apiService.getNama();
       role.value = parseUserRole(_apiService.getRole());

@@ -26,7 +26,6 @@ class AndonHomeController extends GetxController {
   @override
   Future<void> onInit() async {
     super.onInit();
-    await Alarm.init();
     await AwesomeNotifications().requestPermissionToSendNotifications();
     await fetchAndonCalls();
     _setupWebSocketListener();
