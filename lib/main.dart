@@ -1,4 +1,3 @@
-import 'package:alarm/alarm.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,7 +13,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await requestPermissions();
   
-  await Alarm.init();
   tz.initializeTimeZones();
 
   Get.put(AuthService());
@@ -45,6 +43,7 @@ Future<void> requestPermissions() async {
     Permission.accessNotificationPolicy,
     Permission.ignoreBatteryOptimizations,
     Permission.scheduleExactAlarm,
+    Permission.systemAlertWindow,
   ].request();
 
   // Cek status masing-masing izin
@@ -98,6 +97,8 @@ String _getPermissionRationaleMessage(Permission permission) {
       return 'Izin ini diperlukan agar alarm tetap berfungsi saat mode hemat baterai aktif';
     case Permission.scheduleExactAlarm:
       return 'Izin ini diperlukan untuk menjadwalkan alarm dengan tepat waktu';
+    case Permission.systemAlertWindow:
+      return 'Izin ini diperlukan untuk menampilkan alarm di layar utama';
     default:
       return 'Izin ini diperlukan untuk fungsi aplikasi';
   }
@@ -119,7 +120,6 @@ Future<void> clearAppCache() async {
   
   // Hapus cache notifications
   await AwesomeNotifications().cancelAll();
-  await Alarm.stopAll();
   
   // Hapus local storage
   final prefs = await SharedPreferences.getInstance();

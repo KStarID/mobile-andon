@@ -9,16 +9,16 @@ import '../data/models/andon_model.dart';
 import '../data/models/assessment_model.dart';
 import '../modules/andon_home/andon_home_controller.dart';
 
-final String baseUrl = 'http://10.0.2.2:5000/api/v1'; // 10.0.2.2 untuk localhost pada emulator Android
-// final String baseUrl = 'http://192.168.0.101:5000/api/v1';
+// final String baseUrl = 'http://10.0.2.2:5000/api/v1'; // 10.0.2.2 untuk localhost pada emulator Android
+final String baseUrl = 'http://192.168.0.100:5000/api/v1';
 // final String baseUrl = 'http://10.106.88.254:5000/api/v1';
 
-final String baseUrl2 = 'http://10.0.2.2:8080/api/v1';
-// final String baseUrl2 = 'http://192.168.0.101:8080/api/v1';
+// final String baseUrl2 = 'http://10.0.2.2:8080/api/v1';
+final String baseUrl2 = 'http://192.168.0.100:8080/api/v1';
 // final String baseUrl2 = 'http://10.106.88.254:8080/api/v1';
 
-final websocketUrl = 'ws://10.0.2.2:5001/api/v1/ws';
-// final websocketUrl = 'ws://192.168.0.101:5001/api/v1/ws';
+// final websocketUrl = 'ws://10.0.2.2:5001/api/v1/ws';
+final websocketUrl = 'ws://192.168.0.100:5001/api/v1/ws';
 // final websocketUrl = 'ws://10.106.88.254:5001/api/v1/ws';
 
 class AuthService extends GetxService {
@@ -475,7 +475,13 @@ class AndonService extends GetxService {
       body: json.encode({'andon_call_id': andonId}),
     );
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+        final jsonResponse = json.decode(response.body);
+        if (jsonResponse['success'] == true) {
+          final List<dynamic> andonData = jsonResponse['data'];
+          return andonData.map((data) => AndonCall.fromJson(data)).toList();
+        } else {
+          throw Exception('API menunjukkan kegagalan');
+        }
     } else {
       throw Exception('Failed to scan QR code. Status code: ${response.statusCode}');
     }
@@ -572,12 +578,14 @@ class AndonService extends GetxService {
         Uri.parse('$baseUrl2/andons/$andonId'),
         headers: _getHeaders(),
       );
+
+      
       
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         if (jsonResponse['success'] == true) {
-          final List<dynamic> andonData = [jsonResponse['data']];
-          return andonData.map((data) => AndonCall.fromJson(data)).toList();
+          final success = jsonResponse['success'];
+          return success;
         } else {
           throw Exception('API response indicates failure');
         }

@@ -24,10 +24,11 @@ class AndonHomeController extends GetxController {
   Timer? _timer;
 
   @override
-  void onInit() {
+  Future<void> onInit() async {
     super.onInit();
-    AwesomeNotifications().requestPermissionToSendNotifications();
-    fetchAndonCalls();
+    await Alarm.init();
+    await AwesomeNotifications().requestPermissionToSendNotifications();
+    await fetchAndonCalls();
     _setupWebSocketListener();
   }
 
@@ -79,20 +80,19 @@ class AndonHomeController extends GetxController {
   }
 
   Future<void> processQRScanResult(String scannedCode, AndonCall call) async {
-    scannedCode='1706';
     final andonNumber = call.andonNumber;
     final cleanAndonNumber = removeLetters(andonNumber);
     if (scannedCode == cleanAndonNumber) {
       try {
           final scan = await _andonService.andonscanner(call.id);
-          if (scan['success'] == true) {
-          Get.offAllNamed('/repairing', arguments: {
-            'andonId': call.id,
-          });
-        } else {
+          if (scan == true) {
+            Get.offAllNamed('/repairing', arguments: {
+              'andonId': call.id,
+            });
+          } else {
           Get.snackbar(
             'Error', 
-            'Failed to process Andon scan: ${scan['message']}',
+            'Failed to process Andon scan: ${scan}',
             snackPosition: SnackPosition.TOP,
             backgroundColor: Colors.redAccent,
             colorText: Colors.white,
@@ -102,6 +102,7 @@ class AndonHomeController extends GetxController {
             overlayColor: Colors.transparent,
           );
         }
+          
       } catch (e) {
         Get.snackbar(
           'Error', 
@@ -137,7 +138,7 @@ class AndonHomeController extends GetxController {
       assetAudioPath: 'assets/alarm.wav',
       loopAudio: true,
       vibrate: true,
-      volume: 0.1,
+      volume: 1,
       fadeDuration: 0.0,
       warningNotificationOnKill: true,
       androidFullScreenIntent: true,
