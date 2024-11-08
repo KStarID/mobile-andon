@@ -1,6 +1,4 @@
 import 'dart:async';
-
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/assessment_model.dart';
@@ -102,17 +100,7 @@ class AsesmentController extends GetxController {
       assessments.assignAll(latestAssessments);
       applyDateFilter();
     } catch (e) {
-      Get.snackbar(
-      'Error', 
-      'Failed to fetch assessment. Please try again.',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: Colors.redAccent,
-      colorText: Colors.white,
-      icon: Icon(Icons.error_outline, color: Colors.white),
-      margin: EdgeInsets.all(16),
-      borderRadius: 8,
-      duration: Duration(seconds: 3),
-    );
+      print('Error in fetchAssessments: $e');
     } finally {
       isLoading(false);
     }
