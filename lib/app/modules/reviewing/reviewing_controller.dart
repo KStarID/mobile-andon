@@ -80,19 +80,8 @@ class ReviewingController extends GetxController {
   Future<void> reviewRepairing(int andonId, String status) async {
     try {
       await _andonService.LeaderReview(andonId, status);
-      await fetchRepairingCalls(); // Refresh the list after review
-      Get.back(); // Close the confirmation dialog
-      Get.snackbar(
-        'Success', 
-        'Review submitted successfully',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        duration: Duration(seconds: 3),
-        isDismissible: true,
-        overlayBlur: 0,
-        overlayColor: Colors.transparent,
-      );
+      await fetchRepairingCalls(); 
+      Get.back(); 
     } catch (e) {
       print('Error reviewing repairing: $e');
       Get.snackbar(

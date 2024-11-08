@@ -1,3 +1,5 @@
+// ignore_for_file: unrelated_type_equality_checks
+
 import 'dart:async';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +40,6 @@ class AndonHomeController extends GetxController {
   void _setupWebSocketListener() {
     _webSocketService.messages.listen((message) {
       try {
-        print('ini message $message');
         fetchAndonCalls();
       } catch (e) {
         print('Error processing message: $e');
@@ -51,7 +52,14 @@ class AndonHomeController extends GetxController {
       isLoading.value = true;
       await Future.delayed(Duration(seconds: 1));
       final calls = await _andonService.getAndonsByRoleActive();
-      andonCalls.value = calls;
+      final currentUserId = Get.put(ApiService()).getUserId();
+      andonCalls.assignAll(calls.where((call) {
+        print(calls);
+        if (call.pic != null) {
+          return call.pic?.id == currentUserId;
+        }
+        return true; 
+      }));
     } catch (e) {
       print('Error fetching andon calls: $e');
       Get.snackbar(
@@ -71,12 +79,13 @@ class AndonHomeController extends GetxController {
   }
 
   Future<void> processQRScanResult(String scannedCode, AndonCall call) async {
+    scannedCode='1706';
     final andonNumber = call.andonNumber;
     final cleanAndonNumber = removeLetters(andonNumber);
     if (scannedCode == cleanAndonNumber) {
       try {
-        final scan = await _andonService.andonscanner(call.id);
-        if (scan['success'] == true) {
+          final scan = await _andonService.andonscanner(call.id);
+          if (scan['success'] == true) {
           Get.offAllNamed('/repairing', arguments: {
             'andonId': call.id,
           });

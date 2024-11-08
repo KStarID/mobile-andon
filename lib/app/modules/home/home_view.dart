@@ -115,7 +115,6 @@ class HomeView extends GetView<HomeController> {
           ],
           onTap: (index) {
             if (index == 0) {
-              Get.offAllNamed('/home');
             } else if (index == 1 && canViewAssessment) {
               Get.offAllNamed('/asesment');
             } else if (index == (canViewAssessment ? 2 : 1)) {

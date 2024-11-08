@@ -391,7 +391,6 @@ class AndonHomeView extends GetView<AndonHomeController> {
           } else if (canViewAssessment && index == 1) {
             Get.offAllNamed('/asesment');
           } else if (index == (canViewAssessment ? 2 : 1)) {
-            Get.offAllNamed('/andon-home');
           }
         },
       );

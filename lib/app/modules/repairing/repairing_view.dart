@@ -151,6 +151,7 @@ class RepairingView extends GetView<RepairingController> {
             _buildTextField(
               controller: controller.remarksController,
               label: 'Remarks',
+              isRequired: false,
             ),
             // Menambahkan tombol untuk pemindaian QR
             SizedBox(height: 30),
@@ -276,7 +277,9 @@ class RepairingView extends GetView<RepairingController> {
     required TextEditingController controller,
     required String label,
     int maxLines = 1,
-    bool isRequired = false,
+    bool isRequired = true,
+    bool? enabled,
+    String? hintText,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,33 +289,58 @@ class RepairingView extends GetView<RepairingController> {
             children: [
               TextSpan(
                 text: label,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary400),
+                style: TextStyle(
+                  fontSize: 18, 
+                  fontWeight: FontWeight.bold, 
+                  color: AppColors.primary400
+                ),
               ),
               if (isRequired)
                 TextSpan(
                   text: ' *',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
+                  style: TextStyle(
+                    fontSize: 18, 
+                    fontWeight: FontWeight.bold, 
+                    color: Colors.red
+                  ),
                 ),
             ],
           ),
         ),
         SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primary400),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primary400, width: 2),
-            ),
-            filled: true,
-            fillColor: Colors.white,
+        Container(
+          decoration: BoxDecoration(
+            color: enabled == false ? Colors.grey[200] : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: Offset(0, 4),
+              ),
+            ],
           ),
-          maxLines: maxLines,
-          validator: (value) => value?.isEmpty ?? true ? 'Please fill all required fields' : null,
+          child: TextField(
+            controller: controller,
+            maxLines: maxLines,
+            enabled: enabled ?? true,
+            style: TextStyle(
+              color: enabled == false ? Colors.grey[700] : Colors.black,
+            ),
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: enabled == false ? Colors.grey[200] : Colors.white,
+              hintText: hintText,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+            ),
+          ),
         ),
       ],
     );

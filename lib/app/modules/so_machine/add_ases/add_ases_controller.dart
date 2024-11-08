@@ -134,11 +134,9 @@ class AddAsesController extends GetxController {
       final machine = await _apiService.getMachineDetails(machineCodeAssetController.text);
       
       if (machine != null) {
-        print('Machine found: ${machine.name}');
         isMachineExist.value = true;
         selectedMachineId.value = machine.id;
         machineName.text = machine.name;
-        print('Machine name set to: ${machineName.text}');
         updateMachineStatus(machine.status.toUpperCase());
         saveData();
         
@@ -199,15 +197,16 @@ class AddAsesController extends GetxController {
       
       if (!isMachineExist.value) {
         final machineData = {
-          'code': machineCodeAssetController.text,
+          'id': machineCodeAssetController.text,
           'name': machineName.text,
         };
+        print('ini machineData: $machineData');
         
         final newMachine = await _apiService.createMachine(machineData);
         if (newMachine == null) {
           throw Exception('Failed to create new machine');
         }
-        machineId = newMachine.id;
+        machineId = machineCodeAssetController.text;
       } else {
         machineId = selectedMachineId.value!;
       }
@@ -224,7 +223,7 @@ class AddAsesController extends GetxController {
         'notes': detailsController.text,
       };
 
-      await Get.find<AsesmentController>().addAssessment(newAssessmentData);
+      await Get.put(AsesmentController()).addAssessment(newAssessmentData);
       
       Get.snackbar(
         'Success', 

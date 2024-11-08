@@ -322,7 +322,6 @@ class AsesmentView extends GetView<AsesmentController> {
           Get.offAllNamed('/home');
         } 
         else if (index == 1) {
-          Get.offAllNamed('/asesment');
         }
         else if (index == 2) {
           Get.offAllNamed('/andon-home');

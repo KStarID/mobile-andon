@@ -149,15 +149,6 @@ class RepairingController extends GetxController {
     try {
       await _andonService.addRepairing(repairingData, andonId);
       saveData();
-      Get.snackbar('Success', 'Repairing added successfully',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-      duration: Duration(seconds: 3),
-      isDismissible: true,
-      overlayBlur: 0,
-      overlayColor: Colors.transparent,
-      );
       Get.offAllNamed('/andon-home');
     } catch (e) {
       Get.snackbar(

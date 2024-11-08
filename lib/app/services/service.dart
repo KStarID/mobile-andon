@@ -403,21 +403,17 @@ class WebSocketService extends GetxService {
         final role = _apiService.getRole()?.toUpperCase();
         final id = _apiService.getUserId();
         var type = decodedMessage['type']?.toString().toLowerCase();
-        var assignedTo = decodedMessage['assigned_to']?.toString().toUpperCase();
 
         // Tambahkan pesan ke messages untuk didengarkan controller
         messages.add(decodedMessage);
 
-        // Cek role dan assigned_to untuk menentukan notifikasi
-        if (assignedTo == role) {
-          if (type == 'andon') {
-            _checkAndScheduleAlarm(decodedMessage, role);
-          } else if (type == 'pic') {
-            _targetAlarm(decodedMessage, id);
-          } else if (type == 'leader') {
-            _initNotification(decodedMessage, id);
-          }
-        }
+      if (type == 'leader') {
+        _initNotification(decodedMessage, id);
+      } else if (type == 'pic') {
+        _targetAlarm(decodedMessage, id);
+      } else if (type == 'andon') {
+        _checkAndScheduleAlarm(decodedMessage, role);
+      }
       } catch (e) {
         print('Error processing WebSocket message: $e');
       }
@@ -472,13 +468,12 @@ class AndonService extends GetxService {
     };
   }
 
-  Future<Map<String, dynamic>> andonscanner(int andonId) async {
+  Future<List<AndonCall>> andonscanner(int andonId) async {
     final response = await http.post(
       Uri.parse('$baseUrl2/andons/scan-qr'),
       headers: _getHeaders(),
       body: json.encode({'andon_call_id': andonId}),
     );
-    print('response: ${response.body}');
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
@@ -622,8 +617,6 @@ class AndonService extends GetxService {
       headers: _getHeaders(),
       body: json.encode({'status': status}),
     );
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
     if (response.statusCode == 200) {
       Get.snackbar('Success', 'Status updated successfully',
       snackPosition: SnackPosition.TOP,
