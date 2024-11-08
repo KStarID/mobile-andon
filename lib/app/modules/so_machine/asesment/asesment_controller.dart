@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/assessment_model.dart';
@@ -19,6 +22,8 @@ class AsesmentController extends GetxController {
   final itemsPerPage = 10;
   final currentPage = 1.obs;
   final totalPages = 1.obs;
+
+  Timer? _timer;
 
   List<Assessment> get paginatedAssessments {
     final startIndex = (currentPage.value - 1) * itemsPerPage;
@@ -52,6 +57,19 @@ class AsesmentController extends GetxController {
     super.onInit();
     _initializeApiService();
     fetchAssessments();
+    _startPeriodicRefresh();
+  }
+
+  @override
+  void onClose() {
+    _timer?.cancel();
+    super.onClose();
+  }
+
+  void _startPeriodicRefresh() {
+    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
+      fetchAssessments();
+    });
   }
 
   void _initializeApiService() {
@@ -78,13 +96,23 @@ class AsesmentController extends GetxController {
   Future<void> fetchAssessments() async {
     try {
       isLoading(true);
+      await Future.delayed(Duration(seconds: 1));
       final fetchedAssessments = await _apiService.getAssessments();
-      final latestAssessments = groupAndGetLatestAssessments(fetchedAssessments);
+      final latestAssessments = groupAndGetLatestAssessments(fetchedAssessments!);
       assessments.assignAll(latestAssessments);
       applyDateFilter();
     } catch (e) {
-      print('Error fetching assessments: $e');
-      Get.snackbar('Error', 'Failed to fetch assessments: $e');
+      Get.snackbar(
+      'Error', 
+      'Failed to fetch assessment. Please try again.',
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: Colors.redAccent,
+      colorText: Colors.white,
+      icon: Icon(Icons.error_outline, color: Colors.white),
+      margin: EdgeInsets.all(16),
+      borderRadius: 8,
+      duration: Duration(seconds: 3),
+    );
     } finally {
       isLoading(false);
     }
@@ -105,13 +133,12 @@ class AsesmentController extends GetxController {
     try {
       isLoading(true);
       final createdAssessment = await _apiService.createAssessment(assessmentData);
-      assessments.add(createdAssessment);
+      assessments.add(createdAssessment!);
       applyDateFilter();
       update();
-    } catch (e) {
-      print('Error adding assessment: $e');
-      rethrow;
-    } finally {
+      Get.offAllNamed('/asesment');
+    }finally {
+      Get.offAllNamed('/asesment');
       isLoading(false);
     }
   }

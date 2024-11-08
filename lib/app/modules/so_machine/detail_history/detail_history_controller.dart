@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/models/assessment_model.dart';
 import '../../../services/service.dart';
@@ -23,14 +24,23 @@ class DetailHistoryController extends GetxController {
     try {
       isLoading(true);
       final history = await _apiService.getAssessmentHistoryByMachineId(machineId);
-      history.sort((a, b) => b.id.compareTo(a.id));
+      history.sort((a, b) => b.id!.compareTo(a.id!));
       historyList.assignAll(history);
       if (historyList.isNotEmpty) {
         assessment.value = historyList.first;
       }
     } catch (e) {
-      print('Error fetching assessment history: $e');
-      Get.snackbar('Error', 'Failed to fetch assessment history');
+      Get.snackbar(
+      'Error', 
+      'Failed to fetch assessment history. Please try again.',
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: Colors.redAccent,
+      colorText: Colors.white,
+      icon: Icon(Icons.error_outline, color: Colors.white),
+      margin: EdgeInsets.all(16),
+      borderRadius: 8,
+      duration: Duration(seconds: 3),
+    );
     } finally {
       isLoading(false);
     }

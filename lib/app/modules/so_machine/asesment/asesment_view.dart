@@ -1,50 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../utils/app_colors.dart';
-import '../../../routes/app_pages.dart';
+import '../../../services/service.dart';
 import 'asesment_controller.dart';
 import 'package:intl/intl.dart';
 
 class AsesmentView extends GetView<AsesmentController> {
-  const AsesmentView({Key? key}) : super(key: key);
+  const AsesmentView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Assessments', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text('Machinery', 
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 30,
+            color: Colors.white
+          )
+        ),
         centerTitle: true,
-        backgroundColor: AppColors.primary100,
+        backgroundColor: AppColors.primary400,
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.filter_list),
+            icon: Icon(Icons.filter_list, color: Colors.white, size: 30),
             onPressed: () => _showFilterDialog(context),
           ),
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: Icon(Icons.logout, color: Colors.white, size: 30),
             onPressed: () {
+              Get.find<AuthService>().logout();
               Get.offAllNamed('/splash-screen');
             },
           ),
         ],
       ),
-      body: Column(
-        children: [
-          _buildFilterButtons(context),
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value) {
-                return Center(child: CircularProgressIndicator());
-              } else if (controller.filteredAssessments.isEmpty) {
-                return _buildEmptyState();
-              } else {
-                return _buildAssessmentList();
-              }
-            }),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppColors.primary400, Colors.white],
           ),
-          _buildPaginationControls(),
-        ],
+        ),
+        child: Column(
+          children: [
+            _buildFilterButtons(context),
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary400)));
+                } else if (controller.filteredAssessments.isEmpty) {
+                  return _buildEmptyState();
+                } else {
+                  return _buildAssessmentList();
+                }
+              }),
+            ),
+            _buildPaginationControls(),
+          ],
+        ),
       ),
       floatingActionButton: _buildFloatingActionButtons(),
       bottomNavigationBar: _buildBottomNavigationBar(),
@@ -52,8 +68,20 @@ class AsesmentView extends GetView<AsesmentController> {
   }
 
   Widget _buildFilterButtons(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+    return Container(
+      margin: EdgeInsets.all(16),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
       child: Row(
         children: [
           Expanded(
@@ -62,29 +90,31 @@ class AsesmentView extends GetView<AsesmentController> {
               items: controller.getYearList().map((year) {
                 return DropdownMenuItem<int>(
                   value: year,
-                  child: Text(year.toString()),
+                  child: Text(year.toString(), style: TextStyle(fontSize: 16)),
                 );
               }).toList(),
               onChanged: (year) {
                 if (year != null) controller.setSelectedYear(year);
               },
               isExpanded: true,
+              icon: Icon(Icons.arrow_drop_down, color: AppColors.primary400),
             )),
           ),
-          SizedBox(width: 8),
+          SizedBox(width: 16),
           Expanded(
             child: Obx(() => DropdownButton<int>(
               value: controller.selectedMonth.value,
               items: controller.getMonthList().map((month) {
                 return DropdownMenuItem<int>(
                   value: month['value'],
-                  child: Text(month['label']),
+                  child: Text(month['label'], style: TextStyle(fontSize: 16)),
                 );
               }).toList(),
               onChanged: (month) {
                 if (month != null) controller.setSelectedMonth(month);
               },
               isExpanded: true,
+              icon: Icon(Icons.arrow_drop_down, color: AppColors.primary400),
             )),
           ),
         ],
@@ -97,17 +127,15 @@ class AsesmentView extends GetView<AsesmentController> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.assessment_outlined, size: 80, color: Colors.grey),
+          Icon(Icons.assessment_outlined, size: 100, color: Colors.white),
           SizedBox(height: 20),
           Text(
             'No assessments found',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red),
           ),
           SizedBox(height: 10),
-          Text('Total assessments: ${controller.assessments.length}'),
+          Text('Total assessments: ${controller.assessments.length}', style: TextStyle(color: Colors.black)),
           SizedBox(height: 10),
-          Text('Start Date: ${controller.startDate.value}'),
-          Text('End Date: ${controller.endDate.value}'),
         ],
       ),
     );
@@ -127,7 +155,7 @@ class AsesmentView extends GetView<AsesmentController> {
             elevation: 4,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: Obx(() => DataTable(
-              headingRowColor: MaterialStateProperty.all(AppColors.primary300),
+              headingRowColor: WidgetStateProperty.all(AppColors.primary300),
               dataRowHeight: 60,
               horizontalMargin: 16,
               columnSpacing: 20,
@@ -135,10 +163,10 @@ class AsesmentView extends GetView<AsesmentController> {
               sortAscending: controller.isAscending.value,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
+                    color: Colors.grey.withOpacity(0.3),
                     spreadRadius: 1,
                     blurRadius: 3,
                     offset: Offset(0, 2),
@@ -169,21 +197,28 @@ class AsesmentView extends GetView<AsesmentController> {
                 final assessment = entry.value;
                 return DataRow(
                   cells: [
-                    DataCell(Text('${index + 1}'.padLeft(2, '0'))),
-                    DataCell(Text(assessment.shift.toUpperCase())),
-                    DataCell(Text(DateFormat('yyyy-MM-dd').format(assessment.assessmentDate))),
-                    DataCell(Text(assessment.subArea.area.name)),
-                    DataCell(Text(assessment.subArea.name)),
-                    DataCell(Text(assessment.sopNumber)),
-                    DataCell(Text(assessment.model.name)),
-                    DataCell(Text(assessment.machine.id)),
-                    DataCell(Text(assessment.machine.name)),
-                    DataCell(_buildStatusCell(assessment.machine.status.toUpperCase())),
-                    DataCell(Text(assessment.notes ?? '')),
+                    DataCell(Text('${index + 1}'.padLeft(2, '0'), textAlign: TextAlign.center)),
+                    DataCell(Text(assessment.shift.toUpperCase(), textAlign: TextAlign.center)),
+                    DataCell(Text(DateFormat('yyyy-MM-dd').format(assessment.assessmentDate), textAlign: TextAlign.center)),
+                    DataCell(Text(assessment.subArea.area.name, textAlign: TextAlign.center)),
+                    DataCell(Text(assessment.subArea.name, textAlign: TextAlign.center)),
+                    DataCell(Text(assessment.sop.name, textAlign: TextAlign.center)),
+                    DataCell(Text(assessment.model.name, textAlign: TextAlign.center)),
+                    DataCell(Text(assessment.machine.id, textAlign: TextAlign.center)),
+                    DataCell(Text(assessment.machine.name, textAlign: TextAlign.center)),
+                    DataCell(_buildStatusCell(assessment.status.toUpperCase())),
+                    DataCell(Text(
+                      assessment.notes != null 
+                        ? (assessment.notes!.length > 20 
+                            ? '${assessment.notes!.substring(0, 20)}...' 
+                            : assessment.notes!)
+                        : '',
+                      textAlign: TextAlign.center
+                    )),
                   ],
                   onSelectChanged: (selected) {
                     if (selected == true) {
-                      Get.toNamed(Routes.DETAIL_HISTORY, arguments: assessment);
+                      Get.offAllNamed('/detail-history', arguments: assessment);
                     }
                   },
                 );
@@ -217,7 +252,7 @@ class AsesmentView extends GetView<AsesmentController> {
     }
     return Container(
       width: 80, 
-      height: 30, 
+      height: 35, 
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: backgroundColor,
@@ -237,21 +272,23 @@ class AsesmentView extends GetView<AsesmentController> {
       children: [
         FloatingActionButton(
           heroTag: 'add-ases',
-          onPressed: () => Get.toNamed('/add-ases'),
-          child: const Icon(Icons.add, size: 40),
-          backgroundColor: AppColors.primary100,
+          onPressed: () => Get.offAllNamed('/add-ases'),
+          backgroundColor: AppColors.primary400,
+          elevation: 4,
+          child: const Icon(Icons.add, size: 32),
         ),
         const SizedBox(height: 16),
         FloatingActionButton(
           heroTag: 'qr-scanner',
           onPressed: () async {
-            final result = await Get.toNamed(Routes.QR_SCAN, arguments: true);
+            final result = await Get.toNamed('/qr-scan', arguments: true);
             if (result != null) {
-              Get.toNamed(Routes.DETAIL_HISTORY, arguments: result);
+              Get.offAllNamed('/detail-history', arguments: result);
             }
           },
-          child: const Icon(Icons.qr_code_scanner, size: 40),
-          backgroundColor: AppColors.primary100,
+          backgroundColor: AppColors.primary400,
+          elevation: 4,
+          child: const Icon(Icons.qr_code_scanner, size: 32),
         ),
         const SizedBox(height: 16),
       ],
@@ -263,14 +300,17 @@ class AsesmentView extends GetView<AsesmentController> {
       currentIndex: 1,
       selectedItemColor: AppColors.primary400,
       unselectedItemColor: Colors.grey,
+      selectedFontSize: 14,
+      unselectedFontSize: 14,
+      type: BottomNavigationBarType.fixed,
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.dashboard),
           label: 'Dashboard',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.assessment),
-          label: 'Assessment',
+          icon: Icon(Icons.settings_suggest),
+          label: 'Machinery',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.notification_important),
@@ -296,50 +336,61 @@ class AsesmentView extends GetView<AsesmentController> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Choose Year and Month'),
+          title: Text('Choose Year and Month', style: TextStyle(color: AppColors.primary400)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
+              SizedBox(
                 width: double.maxFinite,
-                child: DropdownButton<int>(
-                  isExpanded: true,
-                  value: controller.selectedYear.value,
-                  items: List.generate(5, (index) => DateTime.now().year + index).map((year) {
-                    return DropdownMenuItem<int>(
-                      value: year,
-                      child: Text(year.toString()),
-                    );
-                  }).toList(),
-                  onChanged: (year) {
-                    if (year != null) controller.setSelectedYear(year);
-                  },
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<int>(
+                    isExpanded: true,
+                    value: controller.selectedYear.value,
+                    items: List.generate(5, (index) => DateTime.now().year - index).map((year) {
+                      return DropdownMenuItem<int>(
+                        value: year,
+                        child: Text(year.toString()),
+                      );
+                    }).toList(),
+                    onChanged: (year) {
+                      if (year != null) controller.setSelectedYear(year);
+                    },
+                  ),
                 ),
               ),
-              SizedBox(height: 10),
-              Container(
+              SizedBox(height: 16),
+              SizedBox(
                 width: double.maxFinite,
-                child: DropdownButton<int>(
-                  isExpanded: true,
-                  value: controller.selectedMonth.value,
-                  items: List.generate(12, (index) => index + 1).map((month) {
-                    return DropdownMenuItem<int>(
-                      value: month,
-                      child: Text(DateFormat('MMMM').format(DateTime(2022, month))),
-                    );
-                  }).toList(),
-                  onChanged: (month) {
-                    if (month != null) controller.setSelectedMonth(month);
-                  },
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<int>(
+                    isExpanded: true,
+                    value: controller.selectedMonth.value,
+                    items: List.generate(12, (index) => index + 1).map((month) {
+                      return DropdownMenuItem<int>(
+                        value: month,
+                        child: Text(DateFormat('MMMM').format(DateTime(2022, month))),
+                      );
+                    }).toList(),
+                    onChanged: (month) {
+                      if (month != null) controller.setSelectedMonth(month);
+                    },
+                  ),
                 ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 24),
               ElevatedButton(
-                child: Text('Apply Filter'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary400,
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 onPressed: () {
                   controller.applyDateFilter();
                   Navigator.of(context).pop();
                 },
+                child: Text('Apply Filter'),
               ),
             ],
           ),
@@ -349,19 +400,26 @@ class AsesmentView extends GetView<AsesmentController> {
   }
 
   Widget _buildPaginationControls() {
-    return Obx(() => Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        IconButton(
-          icon: Icon(Icons.chevron_left),
-          onPressed: controller.currentPage.value > 1 ? controller.previousPage : null,
-        ),
-        Text('Halaman ${controller.currentPage.value} dari ${controller.totalPages.value}'),
-        IconButton(
-          icon: Icon(Icons.chevron_right),
-          onPressed: controller.currentPage.value < controller.totalPages.value ? controller.nextPage : null,
-        ),
-      ],
-    ));
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      color: Colors.white,
+      child: Obx(() => Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            icon: Icon(Icons.chevron_left, color: AppColors.primary400),
+            onPressed: controller.currentPage.value > 1 ? controller.previousPage : null,
+          ),
+          Text(
+            'Page ${controller.currentPage.value} of ${controller.totalPages.value}',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary400),
+          ),
+          IconButton(
+            icon: Icon(Icons.chevron_right, color: AppColors.primary400),
+            onPressed: controller.currentPage.value < controller.totalPages.value ? controller.nextPage : null,
+          ),
+        ],
+      )),
+    );
   }
 }

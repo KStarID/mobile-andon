@@ -11,112 +11,249 @@ class UpdateAsesView extends GetView<UpdateAsesController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Update Assessment'),
+        title: const Text('Update Assessment', style: TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
-        backgroundColor: AppColors.primary100,
+        backgroundColor: AppColors.primary400,
+        elevation: 0,
       ),
       body: Obx(() {
         if (controller.assessment.value == null) {
-          return Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary400)));
         }
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: controller.formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Obx(() => DropdownButtonFormField<String>(
-                  value: controller.selectedShift.value,
-                  onChanged: controller.updateShift,
-                  items: controller.shifts.map((shift) => DropdownMenuItem(value: shift, child: Text(shift))).toList(),
-                  decoration: InputDecoration(label: Text('Shift', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
-                )),
-                SizedBox(height: 15),
-
-                SearchableDropdown<SubArea>(
-                  label: 'Sub Area',
-                  searchHint: 'Search Sub Area',
-                  items: controller.filteredSubAreas,
-                  selectedValue: controller.selectedSubArea.value,
-                  onChanged: controller.updateSubArea,
-                  itemBuilder: (subArea) => Text(subArea.name),
-                  displayStringForOption: (subArea) => subArea.name,
-                ),
-
-                TextFormField(
-                  controller: controller.sopNumberController,
-                  decoration: InputDecoration(label: Text('SOP Number', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
-                ),
-                SizedBox(height: 20),
-
-                SearchableDropdown<Model>(
-                  label: 'Model',
-                  searchHint: 'Search Model',
-                  items: controller.filteredModels,
-                  selectedValue: controller.selectedModel.value,
-                  onChanged: controller.updateModel,
-                  itemBuilder: (model) => Text(model.name),
-                  displayStringForOption: (model) => model.name,
-                ),
-
-                TextFormField(
-                  controller: controller.machineCodeAssetController,
-                  decoration: InputDecoration(label: Text('Machine Code Asset', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
-                  readOnly: true,
-                ),
-                SizedBox(height: 20),
-
-                Obx(() => DropdownButtonFormField<String>(
-                  value: controller.machineStatus.value,
-                  onChanged: controller.updateMachineStatus,
-                  items: controller.machineStatusOptions.map((status) => DropdownMenuItem(value: status, child: Text(status))).toList(),
-                  decoration: InputDecoration(label: Text('Machine Status', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
-                )),
-                SizedBox(height: 8),
-
-                TextFormField(
-                  controller: controller.detailsController,
-                  decoration: InputDecoration(label: Text('Remarks', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
-                  maxLines: 3,
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => controller.updateAssessment(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary100,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppColors.primary400, Colors.white],
+            ),
+          ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: controller.formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildDropdown(
+                    label: 'Shift',
+                    value: controller.selectedShift.value,
+                    items: controller.shifts,
+                    onChanged: controller.updateShift,
                   ),
-                  child: Text('Update Assessment', style: TextStyle(color: Colors.black)),
-                ),
-              ],
+                  SizedBox(height: 24),
+                  
+                  _buildSearchableDropdown<SubArea>(
+                    label: 'Sub Area',
+                    searchHint: 'Search Sub Area',
+                    items: controller.subAreas,
+                    selectedValue: controller.selectedSubArea.value,
+                    onChanged: controller.updateSubArea,
+                    itemBuilder: (subArea) => Text(subArea.name),
+                    displayStringForOption: (subArea) => subArea.name,
+                  ),
+                  SizedBox(height: 24),
+
+                  _buildSearchableDropdown<SOP>(
+                    label: 'SOP',
+                    searchHint: 'Search SOP',
+                    items: controller.sops,
+                    selectedValue: controller.selectedSop.value,
+                    onChanged: controller.updateSop,
+                    itemBuilder: (sop) => Text(sop.name),
+                    displayStringForOption: (sop) => sop.name,
+                  ),
+                  SizedBox(height: 24),
+
+                  _buildSearchableDropdown<Model>(
+                    label: 'Model',
+                    searchHint: 'Search Model',
+                    items: controller.filteredModels,
+                    selectedValue: controller.selectedModel.value,
+                    onChanged: controller.updateModel,
+                    itemBuilder: (model) => Text(model.name),
+                    displayStringForOption: (model) => model.name,
+                  ),
+                  SizedBox(height: 24),
+
+                  _buildTextField(
+                    controller: controller.machineCodeAssetController,
+                    label: 'Machine Code Asset',
+                    readOnly: true,
+                  ),
+                  SizedBox(height: 24),
+
+                  _buildDropdown(
+                    label: 'Machine Status',
+                    value: controller.assessmentStatus.value,
+                    items: controller.machineStatusOptions,
+                    onChanged: controller.updateAssessmentStatus,
+                  ),
+                  SizedBox(height: 24),
+
+                  _buildTextField(
+                    controller: controller.detailsController,
+                    label: 'Remarks',
+                    maxLines: 3,
+                  ),
+                  SizedBox(height: 32),
+                  
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () => controller.updateAssessment(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary400,
+                        padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      ),
+                      child: Text('Update Assessment', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
       }),
     );
   }
+
+  Widget _buildDropdown({
+    required String label,
+    required String? value,
+    required List<String> items,
+    required Function(String?) onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+        SizedBox(height: 8),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: value,
+              isExpanded: true,
+              icon: Icon(Icons.arrow_drop_down, color: AppColors.primary400),
+              items: items.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
+              onChanged: onChanged,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    bool readOnly = false,
+    int maxLines = 1,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+        SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: TextFormField(
+            controller: controller,
+            readOnly: readOnly,
+            maxLines: maxLines,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchableDropdown<T>({
+    required String label,
+    required String searchHint,
+    required List<T> items,
+    required T? selectedValue,
+    required Function(T?) onChanged,
+    required Widget Function(T) itemBuilder,
+    required String Function(T) displayStringForOption,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+        SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: SearchableDropdown<T>(
+            items: items,
+            selectedValue: selectedValue,
+            onChanged: onChanged,
+            itemBuilder: itemBuilder,
+            displayStringForOption: displayStringForOption,
+            searchHint: searchHint,
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class SearchableDropdown<T> extends StatefulWidget {
-  final String label;
-  final String searchHint;
   final List<T> items;
   final T? selectedValue;
   final Function(T?) onChanged;
   final Widget Function(T) itemBuilder;
   final String Function(T) displayStringForOption;
+  final String searchHint;
 
   const SearchableDropdown({
-    Key? key,
-    required this.label,
-    required this.searchHint,
+    super.key,
     required this.items,
     required this.selectedValue,
     required this.onChanged,
     required this.itemBuilder,
     required this.displayStringForOption,
-  }) : super(key: key);
+    required this.searchHint,
+  });
 
   @override
   _SearchableDropdownState<T> createState() => _SearchableDropdownState<T>();
@@ -185,8 +322,13 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
           offset: Offset(0.0, size.height + 5.0),
           child: Material(
             elevation: 4.0,
+            borderRadius: BorderRadius.circular(12),
             child: Container(
               height: 200,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Column(
                 children: [
                   Padding(
@@ -195,8 +337,15 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                       controller: _searchController,
                       decoration: InputDecoration(
                         hintText: widget.searchHint,
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.search, color: AppColors.primary400),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.primary400),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.primary400, width: 2),
+                        ),
                       ),
                       onChanged: (value) {
                         setState(() {
@@ -238,40 +387,33 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(widget.label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        SizedBox(height: 8),
-        CompositedTransformTarget(
-          link: _layerLink,
-          child: GestureDetector(
-            onTap: _toggleDropdown,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(4),
+    return CompositedTransformTarget(
+      link: _layerLink,
+      child: GestureDetector(
+        onTap: _toggleDropdown,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.primary400),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  widget.selectedValue != null
+                      ? widget.displayStringForOption(widget.selectedValue as T)
+                      : widget.searchHint,
+                  style: TextStyle(fontSize: 16),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      widget.selectedValue != null
-                          ? widget.displayStringForOption(widget.selectedValue as T)
-                          : 'Select ${widget.label}',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                  Icon(Icons.arrow_drop_down),
-                ],
-              ),
-            ),
+              Icon(Icons.arrow_drop_down, color: AppColors.primary400),
+            ],
           ),
         ),
-        SizedBox(height: 16),
-      ],
+      ),
     );
   }
 }

@@ -12,7 +12,7 @@ class QRScannerView extends StatefulWidget {
 }
 
 class _QRScannerViewState extends State<QRScannerView> {
-  final AsesmentController asesmentController = Get.find<AsesmentController>();
+  final AsesmentController asesmentController = Get.put(AsesmentController());
   MobileScannerController cameraController = MobileScannerController();
 
   @override
@@ -28,16 +28,28 @@ class _QRScannerViewState extends State<QRScannerView> {
     }
   }
 
-  void _processQRCode(String code) {
+  Future<void> _processQRCode(String code) async {
     if (widget.isFromAsesment) {
       final assessment = asesmentController.findAssessmentByQRCode(code);
       if (assessment != null) {
         Get.back(result: assessment);
       } else {
-        Get.snackbar('Error', 'Data not found, please add new assessment');
+        Get.snackbar(
+          'Error', 
+          'Data not found. Please add new assessment.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.redAccent,
+          colorText: Colors.white,
+          icon: Icon(Icons.error_outline, color: Colors.white),
+          margin: EdgeInsets.all(16),
+          borderRadius: 8,
+          duration: Duration(seconds: 3),
+        );
       }
     } else {
-      Get.back(result: code);
+      Future.delayed(Duration(seconds: 2), () {
+        Get.back(result: code);
+      });
     }
   }
 

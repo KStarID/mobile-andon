@@ -12,6 +12,10 @@ abstract class Routes {
   static const SPLASH_SCREEN = _Paths.SPLASH_SCREEN;
   static const UPDATE_ASES = _Paths.UPDATE_ASES;
   static const ANDON_HOME = _Paths.ANDON_HOME;
+  static const REPAIRING = _Paths.REPAIRING;
+  static const REVIEWING = _Paths.REVIEWING;
+  static const ANDON_HISTORY = _Paths.ANDON_HISTORY;
+  static const ANDON_HISTORY_DETAILS = _Paths.ANDON_HISTORY_DETAILS;
 }
 
 abstract class _Paths {
@@ -25,4 +29,8 @@ abstract class _Paths {
   static const SPLASH_SCREEN = '/splash-screen';
   static const UPDATE_ASES = '/update-ases';
   static const ANDON_HOME = '/andon-home';
+  static const REPAIRING = '/repairing';
+  static const REVIEWING = '/reviewing';
+  static const ANDON_HISTORY = '/andon-history';
+  static const ANDON_HISTORY_DETAILS = '/andon-history-details/:id';
 }

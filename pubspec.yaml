@@ -43,6 +43,13 @@ dependencies:
   shared_preferences: ^2.2.3
   get_storage: ^2.1.1
   jwt_decoder: ^2.0.1
+  awesome_notifications: ^0.9.3+1
+  alarm: ^4.0.3
+  vibration: ^2.0.1
+  web_socket_channel: ^3.0.1
+  lottie: ^3.1.3
+  timezone: ^0.9.4
+  permission_handler: ^11.3.1
   
 dev_dependencies:
   flutter_test:
@@ -67,7 +74,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/logos/
-
+    - assets/alarm.wav
+    - assets/lottie/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

@@ -11,52 +11,72 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Detail Assessment', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white, size: 32),
+          onPressed: () {
+            Get.offAllNamed('/asesment');
+          },
+        ),
+        title: const Text('Detail History', 
+          style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white)),
         centerTitle: true,
-        backgroundColor: AppColors.primary100,
+        backgroundColor: AppColors.primary400,
+        elevation: 0,
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
           return Center(child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary400),
           ));
         }
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildDetailSection(),
-              SizedBox(height: 24),
-              Center(
-                child: Text(
-                  'History Movements',
-                  style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppColors.primary400, Colors.white],
+            ),
+          ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildDetailSection(),
+                SizedBox(height: 24),
+                Container(
+                  padding: EdgeInsets.all(10),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'History Movements',
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.primary400,),
+                    ),
+                  ),
                 ),
-              ),
-              SizedBox(height: 16),
-              _buildHistoryList(),
-            ],
+                SizedBox(height: 16),
+                _buildHistoryList(),
+              ],
+            ),
           ),
         );
       }),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            heroTag: 'update-ases',
-            backgroundColor: AppColors.primary100,
-            onPressed: () {
-              if (controller.assessment.value != null) {
-                Get.toNamed('/update-ases', arguments: controller.assessment.value);
-              } else {
-                Get.snackbar('Error', 'No assessment data available');
-              }
-            },
-            child: const Icon(Icons.edit),
-          ),
-          SizedBox(height: 16),
-        ],
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'update-ases',
+        backgroundColor: AppColors.primary400,
+        onPressed: () {
+          if (controller.assessment.value != null) {
+            Get.toNamed('/update-ases', arguments: controller.assessment.value);
+          } else {
+            Get.snackbar('Error', 'No assessment data available');
+          }
+        },
+        icon: const Icon(Icons.edit),
+        label: Text('Update'),
       ),
     );
   }
@@ -66,45 +86,54 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
     if (assessment == null) return SizedBox.shrink();
 
     return Card(
-      elevation: 4,
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDetailItem('Submitted by', assessment.user.username),
-            _buildDetailItem('Shift', assessment.shift),
+            Text('Assessment Details', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary400)),
+            Divider(color: AppColors.primary400),
+            _buildDetailItem('Submitted by', assessment.user.name.toUpperCase()),
+            _buildDetailItem('Shift', assessment.shift.toUpperCase()),
             _buildDetailItem('Updated Time', DateFormat('yyyy-MM-dd HH:mm:ss').format(assessment.assessmentDate)),
             _buildDetailItem('Area', assessment.subArea.area.name),
             _buildDetailItem('Sub Area', assessment.subArea.name),
-            _buildDetailItem('SOP Number', assessment.sopNumber),
+            _buildDetailItem('SOP', assessment.sop.name),
             _buildDetailItem('Model', assessment.model.name),
             _buildDetailItem('M/C Code', assessment.machine.id),
             _buildDetailItem('M/C Name', assessment.machine.name),
-            _buildDetailItem('M/C Status', assessment.machine.status),
+            _buildDetailItem('M/C Status', assessment.status.toUpperCase()),
             _buildDetailItem('Remarks', assessment.notes ?? 'No notes'),
           ],
         ),
       ),
     );
   }
-
   Widget _buildDetailItem(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              '$label:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Text(
+                  '$label ',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary400),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: label == 'M/C Status' ? _buildStatusCell(value) : Text(":  $value", style: TextStyle(fontSize: 16)),
+              ),
+            ],
           ),
-          Expanded(
-            child: Text(value),
-          ),
+          SizedBox(height: 4),
+          Divider(color: Colors.grey[300]),
         ],
       ),
     );
@@ -118,49 +147,103 @@ class DetailHistoryView extends GetView<DetailHistoryController> {
       itemBuilder: (context, index) {
         final assessment = controller.historyList[index];
         return Card(
+          elevation: 4,
           margin: EdgeInsets.only(bottom: 16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Assessment #${index + 1}',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 8),
-                _buildHistoryItem('Submitted By', assessment.user.username),
-                _buildHistoryItem('Updated Time', DateFormat('yyyy-MM-dd HH:mm:ss').format(assessment.assessmentDate)),
-                _buildHistoryItem('Area', assessment.subArea.area.name),
-                _buildHistoryItem('SubArea', assessment.subArea.name),
-                _buildHistoryItem('Status', assessment.machine.status),
-                _buildHistoryItem('Remarks', assessment.notes ?? 'No notes'),
-              ],
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: ExpansionTile(
+            title: Text(
+              'Assessment #${index + 1}',
+              style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary400),
             ),
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHistoryItem('Submitted By', assessment.user.name.toUpperCase()),
+                    _buildHistoryItem('Updated Time', DateFormat('yyyy-MM-dd HH:mm:ss').format(assessment.assessmentDate)),
+                    _buildHistoryItem('Area', assessment.subArea.area.name),
+                    _buildHistoryItem('SubArea', assessment.subArea.name),
+                    _buildHistoryItem('Status', assessment.status.toUpperCase()),
+                    _buildHistoryItem('Remarks', assessment.notes ?? 'No notes'),
+                  ],
+                ),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
-  Widget _buildHistoryItem(String label, String? value) {
+  Widget _buildHistoryItem(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
         children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              '$label:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Text(
+                  '$label ',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary400),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: label == 'Status' ? _buildStatusCell(value) : Text(":  $value", style: TextStyle(fontSize: 14)),
+              ),
+            ],
           ),
-          Expanded(
-            child: Text(value ?? 'N/A'),
-          ),
+          Divider(color: AppColors.primary400.withOpacity(0.5), thickness: 0.5),
         ],
       ),
     );
+  }
+
+  Widget _buildStatusCell(String status) {
+    Color backgroundColor;
+    Color textColor;
+    switch (status.toLowerCase()) {
+      case 'ok':
+        backgroundColor = Colors.green[100]!;
+        textColor = Colors.green[800]!;
+        break; 
+      case 'ng':
+        backgroundColor = Colors.red[100]!;
+        textColor = Colors.red[800]!;
+        break;
+      case 'repairing':
+        backgroundColor = Colors.yellow[100]!;
+        textColor = Colors.yellow[900]!;
+        break;
+      default:
+        backgroundColor = Colors.grey[100]!;
+        textColor = Colors.grey[800]!;
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Text(
+        status.toUpperCase(),
+        style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
+      ),
+    );  
   }
 }

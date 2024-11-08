@@ -1,11 +1,19 @@
 import 'package:get/get.dart';
 
+import '../modules/andon_history/andon_history_binding.dart';
+import '../modules/andon_history/andon_history_view.dart';
+import '../modules/andon_history_details/andon_history_details_binding.dart';
+import '../modules/andon_history_details/andon_history_details_view.dart';
 import '../modules/andon_home/andon_home_binding.dart';
 import '../modules/andon_home/andon_home_view.dart';
 import '../modules/home/home_binding.dart';
 import '../modules/home/home_view.dart';
 import '../modules/login_page/login_page_binding.dart';
 import '../modules/login_page/login_page_view.dart';
+import '../modules/repairing/repairing_binding.dart';
+import '../modules/repairing/repairing_view.dart';
+import '../modules/reviewing/reviewing_binding.dart';
+import '../modules/reviewing/reviewing_view.dart';
 import '../modules/so_machine/add_ases/add_ases_binding.dart';
 import '../modules/so_machine/add_ases/add_ases_view.dart';
 import '../modules/so_machine/asesment/asesment_binding.dart';
@@ -69,8 +77,28 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.ANDON_HOME,
-      page: () => const AndonHomeView(),
+      page: () => AndonHomeView(),
       binding: AndonHomeBinding(),
+    ),
+    GetPage(
+      name: _Paths.REPAIRING,
+      page: () => RepairingView(),
+      binding: RepairingBinding(),
+    ),
+    GetPage(
+      name: _Paths.REVIEWING,
+      page: () => const ReviewingView(),
+      binding: ReviewingBinding(),
+    ),
+    GetPage(
+      name: _Paths.ANDON_HISTORY,
+      page: () => const AndonHistoryView(),
+      binding: AndonHistoryBinding(),
+    ),
+    GetPage(
+      name: _Paths.ANDON_HISTORY_DETAILS,
+      page: () => const AndonHistoryDetailsView(),
+      binding: AndonHistoryDetailsBinding(),
     ),
   ];
 }
