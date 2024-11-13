@@ -130,7 +130,7 @@ class AndonHistoryDetailsView extends GetView<AndonHistoryDetailsController> {
         backgroundColor = Colors.red[100]!;
         textColor = Colors.red[800]!;
         break;
-      case 'under review':
+      case 'under_review':
         backgroundColor = Colors.blue[100]!;
         textColor = Colors.blue[800]!;
         break;

@@ -1,6 +1,7 @@
 enum UserRole {
   admin,
-  manajer,
+  accManagerPe,
+  accManagerMe,
   me,
   pe,
   leader,
@@ -13,11 +14,11 @@ extension UserRoleExtension on UserRole {
   }
 
   bool get canViewAssessment {
-    return this == UserRole.admin || this == UserRole.manajer || this == UserRole.me;
+    return this == UserRole.admin || this == UserRole.accManagerMe || this == UserRole.me;
   }
 
   bool get canAssess {
-    return this == UserRole.admin || this == UserRole.manajer || this == UserRole.me;
+    return this == UserRole.admin || this == UserRole.accManagerMe || this == UserRole.me;
   }
 
   String get stringValue {
@@ -31,14 +32,16 @@ UserRole parseUserRole(String? role) {
   switch (role.toLowerCase()) {
     case 'admin':
       return UserRole.admin;
-    case 'manajer':
-      return UserRole.manajer;
     case 'me':
       return UserRole.me;
     case 'pe':
       return UserRole.pe;
     case 'leader':
       return UserRole.leader;
+    case 'acc-manager-pe':
+      return UserRole.accManagerPe;
+    case 'acc-manager-me':
+      return UserRole.accManagerMe;
     default:
       return UserRole.unknown;
   }

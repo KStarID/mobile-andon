@@ -80,7 +80,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    '${widget.alarmSettings.notificationSettings.body} Andon System need Attention!',
+                    '${widget.alarmSettings.notificationSettings.body} need Attention!',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 18,

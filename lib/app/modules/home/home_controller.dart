@@ -15,6 +15,7 @@ class HomeController extends GetxController {
 
   final downtimeData = <ChartData>[].obs;
   final machineStatusData = <ChartData>[].obs;
+  final downtimeMonth = DateTime.now().obs;
   final mtbfMonth = DateTime.now().obs;
   final mttrMonth = DateTime.now().obs;
   final mttrData = <ChartData>[].obs;
@@ -38,6 +39,15 @@ class HomeController extends GetxController {
   // Tambahkan flag untuk status inisialisasi
   bool isInitialized = false;
 
+  final downtimeTarget = Rx<double?>(null);
+  final mttrTarget = Rx<double?>(null);
+  final mtbfTarget = Rx<double?>(null);
+
+  // Separate monthly view states for each metric
+  final isMTTRMonthlyView = true.obs;
+  final isMTBFMonthlyView = true.obs;
+  final isDowntimeMonthlyView = true.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -47,6 +57,7 @@ class HomeController extends GetxController {
     fetchMTBFData();
     fetchDowntimeData();
     fetchMachineStatusData();
+    fetchTargets();
   }
 
   Future<void> loadUserData() async {
@@ -66,31 +77,43 @@ class HomeController extends GetxController {
     try {
       mttrData.clear();
       final year = selectedYearMTTR.value.toString();
-      final month = selectedMonthMTTR.value.toString().padLeft(2, '0');
+      final month = isMTTRMonthlyView.value ? selectedMonthMTTR.value.toString().padLeft(2, '0') : null;
       
-      final data = await _andonService.getDailyMTTR(year, month);
+      final data = await _andonService.getMTTRData(year, month: month);
       if (data.isEmpty) {
-        Get.snackbar('Info', 'Tidak ada data MTTR untuk periode ini',
-          duration: Duration(seconds: 3),
-          isDismissible: true,
-          overlayBlur: 0,
-          overlayColor: Colors.transparent,
-        );
+        Get.snackbar('Info', 'Tidak ada data MTTR untuk periode ini');
         return;
       }
       
       mttrData.value = data.map((item) => ChartData(
-        'Period ${item['period']}',
-        (item['mttr'] as num).toDouble()
+        isMTTRMonthlyView.value 
+            ? 'Week ${item['period'].toString()}' 
+            : monthNames[int.parse(item['period'].toString()) - 1],
+        double.parse(item['mttr'].toString())
       )).toList();
+
+      await fetchMTTRTarget();
     } catch (e) {
       print('Error fetching MTTR data: $e');
-      Get.snackbar('Error', 'Gagal memuat data MTTR',
-        duration: Duration(seconds: 3),
-        isDismissible: true,
-        overlayBlur: 0,
-        overlayColor: Colors.transparent,
+      Get.snackbar('Error', 'Gagal memuat data MTTR');
+    }
+  }
+
+  Future<void> fetchMTTRTarget() async {
+    try {
+      final year = selectedYearMTTR.value.toString();
+      final month = isMTTRMonthlyView.value 
+          ? selectedMonthMTTR.value.toString().padLeft(2, '0')
+          : null;
+      
+      mttrTarget.value = await _andonService.getTarget(
+        year, 
+        month: month,
+        metricType: 'mttr'
       );
+    } catch (e) {
+      print('Error fetching MTTR target: $e');
+      mttrTarget.value = null;
     }
   }
 
@@ -98,37 +121,50 @@ class HomeController extends GetxController {
     selectedYearMTTR.value = year;
     selectedMonthMTTR.value = month;
     fetchMTTRData();
+    fetchMTTRTarget();
   }
 
   Future<void> fetchMTBFData() async {
     try {
       mtbfData.clear();
       final year = selectedYearMTBF.value.toString();
-      final month = selectedMonthMTBF.value.toString().padLeft(2, '0');
+      final month = isMTBFMonthlyView.value ? selectedMonthMTBF.value.toString().padLeft(2, '0') : null;
       
-      final data = await _andonService.getDailyMTBF(year, month);
+      final data = await _andonService.getMTBFData(year, month: month);
       if (data.isEmpty) {
-        Get.snackbar('Info', 'Tidak ada data MTBF untuk periode ini',
-          duration: Duration(seconds: 3),
-          isDismissible: true,
-          overlayBlur: 0,
-          overlayColor: Colors.transparent,
-        );
+        Get.snackbar('Info', 'Tidak ada data MTBF untuk periode ini');
         return;
       }
       
       mtbfData.value = data.map((item) => ChartData(
-        'Period ${item['period']}',
-        (item['mtbf'] as num).toDouble()
+        isMTBFMonthlyView.value 
+            ? 'Week ${item['period'].toString()}' 
+            : monthNames[int.parse(item['period'].toString()) - 1],
+        double.parse(item['mtbf'].toString())
       )).toList();
+
+      await fetchMTBFTarget();
     } catch (e) {
       print('Error fetching MTBF data: $e');
-      Get.snackbar('Error', 'Gagal memuat data MTBF',
-        duration: Duration(seconds: 3),
-        isDismissible: true,
-        overlayBlur: 0,
-        overlayColor: Colors.transparent,
+      Get.snackbar('Error', 'Gagal memuat data MTBF');
+    }
+  }
+
+  Future<void> fetchMTBFTarget() async {
+    try {
+      final year = selectedYearMTBF.value.toString();
+      final month = isMTBFMonthlyView.value 
+          ? selectedMonthMTBF.value.toString().padLeft(2, '0')
+          : null;
+      
+      mtbfTarget.value = await _andonService.getTarget(
+        year, 
+        month: month,
+        metricType: 'mtbf'
       );
+    } catch (e) {
+      print('Error fetching MTBF target: $e');
+      mtbfTarget.value = null;
     }
   }
 
@@ -136,38 +172,58 @@ class HomeController extends GetxController {
     selectedYearMTBF.value = year;
     selectedMonthMTBF.value = month;
     fetchMTBFData();
+    fetchMTBFTarget();
   }
 
   Future<void> fetchDowntimeData() async {
     try {
       downtimeData.clear();
       final year = selectedYearDowntime.value.toString();
-      final month = selectedMonthDowntime.value.toString().padLeft(2, '0');
+      final month = isDowntimeMonthlyView.value ? selectedMonthDowntime.value.toString().padLeft(2, '0') : null;
       
-      final data = await _andonService.getDailyDowntime(year, month);
+      final data = await _andonService.getDowntimeData(year, month: month);
       if (data.isEmpty) {
-        Get.snackbar('Info', 'Tidak ada data downtime untuk periode ini',
-          duration: Duration(seconds: 3),
-          isDismissible: true,
-          overlayBlur: 0,
-          overlayColor: Colors.transparent,
-        );
+        Get.snackbar('Info', 'Tidak ada data downtime untuk periode ini');
         return;
       }
       
       downtimeData.value = data.map((item) => ChartData(
-        'Period ${item['period']}',
-        (item['downtime'] as num).toDouble()
+        isDowntimeMonthlyView.value 
+            ? 'Week ${item['period'].toString()}' 
+            : monthNames[int.parse(item['period'].toString()) - 1],
+        double.parse(item['downtime'].toString())
       )).toList();
+
+      await fetchDowntimeTarget();
     } catch (e) {
       print('Error fetching downtime data: $e');
-      Get.snackbar('Error', 'Gagal memuat data downtime',
-        duration: Duration(seconds: 3),
-        isDismissible: true,
-        overlayBlur: 0,
-        overlayColor: Colors.transparent,
-      );
+      Get.snackbar('Error', 'Gagal memuat data downtime');
     }
+  }
+
+  Future<void> fetchDowntimeTarget() async {
+    try {
+      final year = selectedYearDowntime.value.toString();
+      final month = isDowntimeMonthlyView.value 
+          ? selectedMonthDowntime.value.toString().padLeft(2, '0')
+          : null;
+      
+      downtimeTarget.value = await _andonService.getTarget(
+        year, 
+        month: month,
+        metricType: 'downtime'
+      );
+    } catch (e) {
+      print('Error fetching Downtime target: $e');
+      downtimeTarget.value = null;
+    }
+  }
+
+  void updateDowntimePeriod(int year, int month) {
+    selectedYearDowntime.value = year;
+    selectedMonthDowntime.value = month;
+    fetchDowntimeData();
+    fetchDowntimeTarget();
   }
 
   Future<void> fetchMachineStatusData() async {
@@ -202,13 +258,7 @@ class HomeController extends GetxController {
       );
     }
   }
-
-  void updateDowntimePeriod(int year, int month) {
-    selectedYearDowntime.value = year;
-    selectedMonthDowntime.value = month;
-    fetchDowntimeData();
-  }
-
+  
   void updateMachineStatusPeriod(int year, int month) {
     selectedYearMachineStatus.value = year;
     selectedMonthMachineStatus.value = month;
@@ -224,6 +274,32 @@ class HomeController extends GetxController {
       print('Error getting canAssess: $e');
       return false;
     }
+  }
+
+  void toggleMTTRViewMode() {
+    isMTTRMonthlyView.value = !isMTTRMonthlyView.value;
+    fetchMTTRData();
+    fetchMTTRTarget();
+  }
+
+  void toggleMTBFViewMode() {
+    isMTBFMonthlyView.value = !isMTBFMonthlyView.value;
+    fetchMTBFData();
+    fetchMTBFTarget();
+  }
+
+  void toggleDowntimeViewMode() {
+    isDowntimeMonthlyView.value = !isDowntimeMonthlyView.value;
+    fetchDowntimeData();
+    fetchDowntimeTarget();
+  }
+
+  Future<void> fetchTargets() async {
+    await Future.wait([
+      fetchMTTRTarget(),
+      fetchMTBFTarget(),
+      fetchDowntimeTarget(),
+    ]);
   }
 }
 

@@ -176,9 +176,10 @@ class RepairingView extends GetView<RepairingController> {
                       ),
                     ),
                   ),
-                ));
+                )); 
               },
-            )
+            ),
+            SizedBox(height: 20),
           ],
         ),
       ),

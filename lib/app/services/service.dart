@@ -413,6 +413,10 @@ class WebSocketService extends GetxService {
         _targetAlarm(decodedMessage, id);
       } else if (type == 'andon') {
         _checkAndScheduleAlarm(decodedMessage, role);
+      } else if (type == 'delayed_andon') {
+        final roleParts = role?.split('-') ?? [];
+        final roleCode = roleParts.length >= 3 ? roleParts[2] : role;
+        _checkAndScheduleAlarm(decodedMessage, roleCode);
       }
       } catch (e) {
         print('Error processing WebSocket message: $e');
@@ -468,22 +472,22 @@ class AndonService extends GetxService {
     };
   }
 
-  Future<List<AndonCall>> andonscanner(int andonId) async {
+  Future<dynamic> andonscanner(int andonId) async {
     final response = await http.post(
       Uri.parse('$baseUrl2/andons/scan-qr'),
       headers: _getHeaders(),
       body: json.encode({'andon_call_id': andonId}),
     );
     if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        if (jsonResponse['success'] == true) {
-          final List<dynamic> andonData = jsonResponse['data'];
-          return andonData.map((data) => AndonCall.fromJson(data)).toList();
-        } else {
-          throw Exception('API menunjukkan kegagalan');
-        }
-    } else {
-      throw Exception('Failed to scan QR code. Status code: ${response.statusCode}');
+        return json.decode(response.body);
+    //     if (jsonResponse['success'] == true) {
+    //       final List<dynamic> andonData = jsonResponse['data'];
+    //       return andonData.map((data) => AndonCall.fromJson(data)).toList();
+    //     } else {
+    //       throw Exception('API menunjukkan kegagalan');
+    //     }
+    // } else {
+      // throw Exception('Failed to scan QR code. Status code: ${response.statusCode}');
     }
   }
 
@@ -598,6 +602,20 @@ class AndonService extends GetxService {
     }
   }
 
+  Future<List<AndonCall>> getAndonManajer() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl2/andons/delayed'),
+      headers: _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      final List<dynamic> andonData = jsonResponse['data'];
+      return andonData.map((data) => AndonCall.fromJson(data)).toList();
+    } else {
+      throw Exception('Failed to load andon history. Status code: ${response.statusCode}');
+    }
+  }
+
   Future<void> addRepairing(Map<String, dynamic> repairingData, int andonId) async {
     final response = await http.put(
       Uri.parse('$baseUrl2/andons/$andonId'),
@@ -659,71 +677,140 @@ class AndonService extends GetxService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getDailyMTTR(String year, String month) async {
+  Future<List<Map<String, dynamic>>> getMTTRData(String year, {String? month}) async {
     try {
+      final url = month != null 
+          ? '$baseUrl2/metrics/mttr?year=$year&month=$month'
+          : '$baseUrl2/metrics/mttr?year=$year';
+      
       final response = await http.get(
-        Uri.parse('$baseUrl2/metrics/mttr?year=$year&month=$month'),
+        Uri.parse(url),
         headers: _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         if (jsonResponse['success'] == true) {
-          return List<Map<String, dynamic>>.from(jsonResponse['data']);
-        } else {
-          throw Exception('API menunjukkan kegagalan');
+          final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(jsonResponse['data']);
+          
+          // Jika mode tahunan, pastikan ada 12 periode
+          if (month == null) {
+            final Map<String, dynamic> monthlyData = {};
+            for (var item in data) {
+              monthlyData[item['period'].toString()] = item;
+            }
+            
+            // Isi bulan yang kosong dengan nilai 0
+            final List<Map<String, dynamic>> completeData = [];
+            for (int i = 1; i <= 12; i++) {
+              final period = i.toString();
+              completeData.add(monthlyData[period] ?? {
+                'period': period,
+                'mttr': '0'
+              });
+            }
+            return completeData;
+          }
+          
+          return data;
         }
-      } else {
-        throw Exception('Gagal memuat data MTTR. Kode status: ${response.statusCode}');
+        throw Exception('API menunjukkan kegagalan');
       }
+      throw Exception('Gagal memuat data MTTR. Kode status: ${response.statusCode}');
     } catch (e) {
-      print('Error dalam getDailyMTTR: $e');
+      print('Error dalam getMTTRData: $e');
       rethrow;
     }
   }
 
-  Future<List<Map<String, dynamic>>> getDailyMTBF(String year, String month) async {
+  Future<List<Map<String, dynamic>>> getMTBFData(String year, {String? month}) async {
     try {
+      final url = month != null 
+          ? '$baseUrl2/metrics/mtbf?year=$year&month=$month'
+          : '$baseUrl2/metrics/mtbf?year=$year';
+      
       final response = await http.get(
-        Uri.parse('$baseUrl2/metrics/mtbf?year=$year&month=$month'),
+        Uri.parse(url),
         headers: _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         if (jsonResponse['success'] == true) {
-          return List<Map<String, dynamic>>.from(jsonResponse['data']);
-        } else {
-          throw Exception('API menunjukkan kegagalan');
+          final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(jsonResponse['data']);
+          
+          // Jika mode tahunan, pastikan ada 12 periode
+          if (month == null) {
+            final Map<String, dynamic> monthlyData = {};
+            for (var item in data) {
+              monthlyData[item['period'].toString()] = item;
+            }
+            
+            // Isi bulan yang kosong dengan nilai 0
+            final List<Map<String, dynamic>> completeData = [];
+            for (int i = 1; i <= 12; i++) {
+              final period = i.toString();
+              completeData.add(monthlyData[period] ?? {
+                'period': period,
+                'mtbf': '0'
+              });
+            }
+            return completeData;
+          }
+          
+          return data;
         }
-      } else {
-        throw Exception('Gagal memuat data MTBF. Kode status: ${response.statusCode}');
+        throw Exception('API menunjukkan kegagalan');
       }
+      throw Exception('Gagal memuat data MTBF. Kode status: ${response.statusCode}');
     } catch (e) {
-      print('Error dalam getDailyMTBF: $e');
+      print('Error dalam getMTBFData: $e');
       rethrow;
     }
   }
 
-  Future<List<Map<String, dynamic>>> getDailyDowntime(String year, String month) async {
+  Future<List<Map<String, dynamic>>> getDowntimeData(String year, {String? month}) async {
     try {
+      final url = month != null 
+          ? '$baseUrl2/metrics/downtime?year=$year&month=$month'
+          : '$baseUrl2/metrics/downtime?year=$year';
+      
       final response = await http.get(
-        Uri.parse('$baseUrl2/metrics/downtime?year=$year&month=$month'),
+        Uri.parse(url),
         headers: _getHeaders(),
       );
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         if (jsonResponse['success'] == true) {
-          return List<Map<String, dynamic>>.from(jsonResponse['data']);
-        } else {
-          throw Exception('API menunjukkan kegagalan');
+          final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(jsonResponse['data']);
+          
+          // Jika mode tahunan, pastikan ada 12 periode
+          if (month == null) {
+            final Map<String, dynamic> monthlyData = {};
+            for (var item in data) {
+              monthlyData[item['period'].toString()] = item;
+            }
+            
+            // Isi bulan yang kosong dengan nilai 0
+            final List<Map<String, dynamic>> completeData = [];
+            for (int i = 1; i <= 12; i++) {
+              final period = i.toString();
+              completeData.add(monthlyData[period] ?? {
+                'period': period,
+                'downtime': '0'
+              });
+            }
+            return completeData;
+          }
+          
+          return data;
         }
-      } else {
-        throw Exception('Gagal memuat data downtime. Kode status: ${response.statusCode}');
+        throw Exception('API menunjukkan kegagalan');
       }
+      throw Exception('Gagal memuat data downtime. Kode status: ${response.statusCode}');
     } catch (e) {
-      print('Error dalam getDailyDowntime: $e');
+      print('Error dalam getDowntimeData: $e');
       rethrow;
     }
   }
@@ -750,5 +837,39 @@ class AndonService extends GetxService {
       rethrow;
     }
   }
+
+  Future<double?> getTarget(String year, {String? month, String? metricType}) async {
+    try {
+      final url = month != null 
+          ? '$baseUrl2/targets?year=$year&month=$month&metricType=$metricType'
+          : '$baseUrl2/targets?year=$year&metricType=$metricType';
+          
+      print('Fetching target from URL: $url'); // Debug print
+      
+      final response = await http.get(
+        Uri.parse(url),
+        headers: _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        print('Target response: $jsonResponse'); // Debug print
+        
+        if (jsonResponse['success'] == true && jsonResponse['data'].isNotEmpty) {
+          final targetData = jsonResponse['data'][0];
+          final targetValue = targetData['target_value'];
+          final targetType = targetData['target_type'];
+          
+          print('Target found - Value: $targetValue, Type: $targetType'); // Debug print
+          return double.tryParse(targetValue.toString());
+        }
+      }
+      return null;
+    } catch (e) {
+      print('Error dalam getTarget: $e');
+      return null;
+    }
+  }
+  
 }
 

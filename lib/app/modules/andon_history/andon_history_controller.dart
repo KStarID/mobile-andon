@@ -58,12 +58,10 @@ class AndonHistoryController extends GetxController {
 
   Future<void> cekleader() async {
     final role = await ApiService().getRoles();
-    if (role == 'leader') {
+    if (role == 'leader'||role == 'acc-manager-pe'||role == 'acc-manager-me'||role == 'admin') {
       fetchAndonCallsAll();
-      print('leader');
     } else {
       fetchAndonCalls();
-      print('not leader');
     }
   }
 

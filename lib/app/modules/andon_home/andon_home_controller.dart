@@ -84,14 +84,14 @@ class AndonHomeController extends GetxController {
     if (scannedCode == cleanAndonNumber) {
       try {
           final scan = await _andonService.andonscanner(call.id);
-          if (scan == true) {
+          if (scan['success'] == true) {
             Get.offAllNamed('/repairing', arguments: {
               'andonId': call.id,
             });
           } else {
           Get.snackbar(
             'Error', 
-            'Failed to process Andon scan: ${scan}',
+            'Failed to process Andon scan: ${scan['message']}',
             snackPosition: SnackPosition.TOP,
             backgroundColor: Colors.redAccent,
             colorText: Colors.white,
@@ -142,8 +142,8 @@ class AndonHomeController extends GetxController {
       warningNotificationOnKill: true,
       androidFullScreenIntent: true,
       notificationSettings: NotificationSettings(
-        title: 'Andon System Alert',
-        body: 'New task assigned to ${Get.find<ApiService>().getRole()}: ${message['line']} - ${message['sop_number']}',
+        title: 'Andon System Alert!',
+        body: 'New task assigned to ${Get.find<ApiService>().getRole()} : ${message['line']} - ${message['sop_number']}',
         icon: 'assets/icon/oppo-logo.png',
       ),
     );

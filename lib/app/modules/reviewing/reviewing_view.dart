@@ -93,14 +93,6 @@ class ReviewingView extends GetView<ReviewingController> {
               color: AppColors.primary400,
             ),
           ),
-          SizedBox(height: 16),
-          Text(
-            'All reviewing list has been reviewed',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
         ],
       ),
     );
