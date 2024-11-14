@@ -137,7 +137,7 @@ class AndonHomeController extends GetxController {
       assetAudioPath: 'assets/alarm.wav',
       loopAudio: true,
       vibrate: true,
-      volume: 1,
+      volume: 0,
       fadeDuration: 0.0,
       warningNotificationOnKill: true,
       androidFullScreenIntent: true,

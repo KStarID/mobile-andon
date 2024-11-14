@@ -22,10 +22,8 @@ class AndonHistoryDetailsController extends GetxController {
   Future<void> fetchAndonDetails(String andonId) async {
     try {
       isLoading(true);
-      final List<AndonCall> andonCalls = await _andonService.getAndonHistoryByAndonId(andonId);
-      if (andonCalls.isNotEmpty) {
-        andonCall.value = andonCalls.first;
-      }
+      final result = await _andonService.getAndonHistoryByAndonId(andonId);
+      andonCall.value = result;
     } catch (e) {
       Get.snackbar('Error', 'Failed to fetch andon details',
         duration: Duration(seconds: 3),

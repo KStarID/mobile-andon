@@ -38,9 +38,6 @@ class AuthService extends GetxService {
           'password': password,
         }),
       );
-      
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
@@ -115,7 +112,6 @@ class ApiService extends GetxService {
   int? _id;
   String? _roles;
   Map<String, String> _getHeaders() {
-    print('access token: ${_authService.getAccessToken()}');
     return {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${_authService.getAccessToken()}',
@@ -169,7 +165,6 @@ class ApiService extends GetxService {
   }
 
   String? getRole() {
-    print('ini coba role service $_role');
     return _role;
   }
 
@@ -318,8 +313,6 @@ class ApiService extends GetxService {
         headers: _getHeaders(),
       );
       
-      print('Response machine: ${response.body}');
-      
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
         if (jsonResponse['success'] == true && jsonResponse['data'] != null) {
@@ -416,7 +409,7 @@ class WebSocketService extends GetxService {
       } else if (type == 'delayed_andon') {
         final roleParts = role?.split('-') ?? [];
         final roleCode = roleParts.length >= 3 ? roleParts[2] : role;
-        _checkAndScheduleAlarm(decodedMessage, roleCode);
+        _checkAndScheduleAlarmManajer(decodedMessage, roleCode, role);
       }
       } catch (e) {
         print('Error processing WebSocket message: $e');
@@ -450,6 +443,21 @@ class WebSocketService extends GetxService {
     }
   }
 
+  void _checkAndScheduleAlarmManajer(Map<String, dynamic> message, String? roleCode, String? role) {
+    final assignedTo = message['assigned_to']?.toString().toLowerCase() ?? '';
+    final type = message['type']?.toString().toLowerCase() ?? '';
+    if (role?.toLowerCase() == 'acc-manager-me' && type == 'delayed_andon' && assignedTo == roleCode?.toLowerCase()) {
+      messages.add(message);
+      print('ini message check and schedule alarm manajer: $message');
+      Get.put(AndonHomeController()).scheduleAlarm(message);
+    }
+    if (role?.toLowerCase() == 'acc-manager-pe' && type == 'delayed_andon' && assignedTo == roleCode?.toLowerCase()) {
+      messages.add(message);
+      print('ini message check and schedule alarm manajer: $message');
+      Get.put(AndonHomeController()).scheduleAlarm(message);
+    }
+  }
+
   void closeConnection() {
     _channel.sink.close();
   }
@@ -465,7 +473,6 @@ class AndonService extends GetxService {
   final AuthService _authService = Get.find<AuthService>();
 
   Map<String, String> _getHeaders() {
-    print('access token: ${_authService.getAccessToken()}');
     return {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${_authService.getAccessToken()}',
@@ -474,9 +481,8 @@ class AndonService extends GetxService {
 
   Future<dynamic> andonscanner(int andonId) async {
     final response = await http.post(
-      Uri.parse('$baseUrl2/andons/scan-qr'),
+      Uri.parse('$baseUrl2/andons/$andonId/scan'),
       headers: _getHeaders(),
-      body: json.encode({'andon_call_id': andonId}),
     );
     if (response.statusCode == 200) {
         return json.decode(response.body);
@@ -493,7 +499,7 @@ class AndonService extends GetxService {
 
   Future<List<Leader>> getLeader() async {
     final response = await http.get(
-      Uri.parse('$baseUrl2/leaders'),
+      Uri.parse('$baseUrl2/users/leaders'),
       headers: _getHeaders(),
     );
     if (response.statusCode == 200) {
@@ -512,7 +518,7 @@ class AndonService extends GetxService {
   Future<List<AndonCall>> getAndonsByRoleActive() async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl2/andons/active'),
+        Uri.parse('$baseUrl2/andons/active/role'),
         headers: _getHeaders(),
       );
 
@@ -536,7 +542,7 @@ class AndonService extends GetxService {
   Future<List<AndonCall>> getAndonsByRoleCompleted() async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl2/andons/completed'),
+        Uri.parse('$baseUrl2/andons/completed/role'),
         headers: _getHeaders(),
       );
 
@@ -560,7 +566,7 @@ class AndonService extends GetxService {
   Future<List<AndonCall>> getAndonsAllCompleted() async {
   try {
       final response = await http.get(
-        Uri.parse('$baseUrl2/andons/completed/all'),
+        Uri.parse('$baseUrl2/andons/completed'),
         headers: _getHeaders(),
     );
     if (response.statusCode == 200) {
@@ -576,20 +582,17 @@ class AndonService extends GetxService {
   }
   }
 
-  Future<List<AndonCall>> getAndonHistoryByAndonId(String andonId) async {
+  Future<AndonCall> getAndonHistoryByAndonId(String andonId) async {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl2/andons/$andonId'),
         headers: _getHeaders(),
       );
 
-      
-      
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
-        if (jsonResponse['success'] == true) {
-          final success = jsonResponse['success'];
-          return success;
+        if (jsonResponse['success'] == true && jsonResponse['data'] != null) {
+          return AndonCall.fromJson(jsonResponse['data']);
         } else {
           throw Exception('API response indicates failure');
         }
@@ -604,7 +607,7 @@ class AndonService extends GetxService {
 
   Future<List<AndonCall>> getAndonManajer() async {
     final response = await http.get(
-      Uri.parse('$baseUrl2/andons/delayed'),
+      Uri.parse('$baseUrl2/manager/andons/delayed'),
       headers: _getHeaders(),
     );
     if (response.statusCode == 200) {
@@ -618,7 +621,7 @@ class AndonService extends GetxService {
 
   Future<void> addRepairing(Map<String, dynamic> repairingData, int andonId) async {
     final response = await http.put(
-      Uri.parse('$baseUrl2/andons/$andonId'),
+      Uri.parse('$baseUrl2/andons/$andonId/submit-submission'),
       headers: _getHeaders(),
       body: json.encode(repairingData),
     );
@@ -639,7 +642,7 @@ class AndonService extends GetxService {
 
   Future<void> LeaderReview(int andonId, String status) async {
     final response = await http.put(
-      Uri.parse('$baseUrl2/andons/$andonId/status'),
+      Uri.parse('$baseUrl2/leader/andons/$andonId/status'),
       headers: _getHeaders(),
       body: json.encode({'status': status}),
     );
@@ -660,10 +663,9 @@ class AndonService extends GetxService {
 
   Future<List<AndonCall>> getCallbyLeader(int leaderId) async {
     final response = await http.get(
-      Uri.parse('$baseUrl2/leaders/$leaderId/andons'),
+      Uri.parse('$baseUrl2/leader/submissions'),
       headers: _getHeaders(),
     );
-    print('response: ${response.body}');
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       if (jsonResponse['success'] == true) {
@@ -843,8 +845,6 @@ class AndonService extends GetxService {
       final url = month != null 
           ? '$baseUrl2/targets?year=$year&month=$month&metricType=$metricType'
           : '$baseUrl2/targets?year=$year&metricType=$metricType';
-          
-      print('Fetching target from URL: $url'); // Debug print
       
       final response = await http.get(
         Uri.parse(url),
@@ -853,14 +853,11 @@ class AndonService extends GetxService {
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
-        print('Target response: $jsonResponse'); // Debug print
         
         if (jsonResponse['success'] == true && jsonResponse['data'].isNotEmpty) {
           final targetData = jsonResponse['data'][0];
           final targetValue = targetData['target_value'];
-          final targetType = targetData['target_type'];
           
-          print('Target found - Value: $targetValue, Type: $targetType'); // Debug print
           return double.tryParse(targetValue.toString());
         }
       }

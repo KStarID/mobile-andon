@@ -10,12 +10,14 @@ class AndonCall {
   final DateTime? responseTime;
   final double? totalRepairingTime;
   final double? totalResponseTime;
+  final int? repairCount;
   final String currentStatus;
   final String? problem;
   final String? solution;
   final String? remarks;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final bool? isDelayNotified;
   final SOP sop;
   final Area area;
   final SubArea subarea;
@@ -34,12 +36,14 @@ class AndonCall {
     this.responseTime,
     this.totalRepairingTime,
     this.totalResponseTime,
+    this.repairCount,
     required this.currentStatus,
     this.problem,
     this.solution,
     this.remarks,
     required this.createdAt,
     required this.updatedAt,
+    this.isDelayNotified,
     required this.sop,
     required this.area,
     required this.subarea,
@@ -60,12 +64,14 @@ class AndonCall {
       responseTime: json['response_time'] != null ? DateTime.tryParse(json['response_time']) : null,
       totalRepairingTime: json['total_repairing_time'] != null ? double.parse(json['total_repairing_time'].toString()) : null,
       totalResponseTime: json['total_response_time'] != null ? double.parse(json['total_response_time'].toString()) : null,
+      repairCount: json['repair_count'],
       currentStatus: json['current_status'] ?? '',
       problem: json['problem'],
       solution: json['solution'],
       remarks: json['remarks'],
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updated_at'] ?? '') ?? DateTime.now(),
+      isDelayNotified: json['is_delay_notified'],
       sop: json['sop'] != null ? SOP.fromJson(json['sop']) : SOP(id: null, name: ''),
       area: json['area'] != null ? Area.fromJson(json['area']) : Area(id: 0, name: ''),
       subarea: json['subarea'] != null ? SubArea.fromJson(json['subarea']) : SubArea(id: 0, name: '', area: Area(id: 0, name: '')),
