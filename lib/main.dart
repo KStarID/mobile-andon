@@ -39,11 +39,9 @@ void main() async {
 Future<void> requestPermissions() async {
   // Daftar izin yang diperlukan
   Map<Permission, PermissionStatus> statuses = await [
-    Permission.notification,
-    Permission.accessNotificationPolicy,
-    Permission.ignoreBatteryOptimizations,
-    Permission.scheduleExactAlarm,
     Permission.systemAlertWindow,
+    Permission.accessNotificationPolicy,
+    Permission.notification,
   ].request();
 
   // Cek status masing-masing izin

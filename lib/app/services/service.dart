@@ -9,17 +9,17 @@ import '../data/models/andon_model.dart';
 import '../data/models/assessment_model.dart';
 import '../modules/andon_home/andon_home_controller.dart';
 
-final String baseUrl = 'http://10.0.2.2:5000/api/v1'; // 10.0.2.2 untuk localhost pada emulator Android
+// final String baseUrl = 'http://10.0.2.2:5000/api/v1'; // 10.0.2.2 untuk localhost pada emulator Android
 // final String baseUrl = 'http://192.168.0.100:5000/api/v1';
-// final String baseUrl = 'http://10.106.88.254:5000/api/v1';
+final String baseUrl = 'http://10.106.88.254:5000/api/v1';
 
-final String baseUrl2 = 'http://10.0.2.2:8080/api/v1';
+// final String baseUrl2 = 'http://10.0.2.2:8080/api/v1';
 // final String baseUrl2 = 'http://192.168.0.100:8080/api/v1';
-// final String baseUrl2 = 'http://10.106.88.254:8080/api/v1';
+final String baseUrl2 = 'http://10.106.88.254:8080/api/v1';
 
-final websocketUrl = 'ws://10.0.2.2:5001/api/v1/ws';
+// final websocketUrl = 'ws://10.0.2.2:5001/api/v1/ws';
 // final websocketUrl = 'ws://192.168.0.100:5001/api/v1/ws';
-// final websocketUrl = 'ws://10.106.88.254:5001/api/v1/ws';
+final websocketUrl = 'ws://10.106.88.254:5001/api/v1/ws';
 
 class AuthService extends GetxService {
 
@@ -381,40 +381,63 @@ class ApiService extends GetxService {
 
 class WebSocketService extends GetxService {
   final ApiService _apiService = Get.put(ApiService());
-  late WebSocketChannel _channel;
+  WebSocketChannel? _channel;
   final messages = <Map<String, dynamic>>[].obs;
+  bool _isConnected = false;
 
   WebSocketService() {
     _connectWebSocket();
   }
 
   void _connectWebSocket() {
-    _channel = WebSocketChannel.connect(Uri.parse(websocketUrl));
-    _channel.stream.listen((message) {
-      try {
-        final decodedMessage = json.decode(message);
-        final role = _apiService.getRole()?.toUpperCase();
-        final id = _apiService.getUserId();
-        var type = decodedMessage['type']?.toString().toLowerCase();
+    if (_isConnected) {
+      print('WebSocket sudah terkoneksi');
+      return;
+    }
 
-        // Tambahkan pesan ke messages untuk didengarkan controller
-        messages.add(decodedMessage);
+    try {
+      _channel = WebSocketChannel.connect(Uri.parse(websocketUrl));
+      _isConnected = true;
+      
+      _channel?.stream.listen(
+        (message) {
+          try {
+            final decodedMessage = json.decode(message);
+            final role = _apiService.getRole()?.toUpperCase();
+            final id = _apiService.getUserId();
+            var type = decodedMessage['type']?.toString().toLowerCase();
 
-      if (type == 'leader') {
-        _initNotification(decodedMessage, id);
-      } else if (type == 'pic') {
-        _targetAlarm(decodedMessage, id);
-      } else if (type == 'andon') {
-        _checkAndScheduleAlarm(decodedMessage, role);
-      } else if (type == 'delayed_andon') {
-        final roleParts = role?.split('-') ?? [];
-        final roleCode = roleParts.length >= 3 ? roleParts[2] : role;
-        _checkAndScheduleAlarmManajer(decodedMessage, roleCode, role);
-      }
-      } catch (e) {
-        print('Error processing WebSocket message: $e');
-      }
-    });
+            messages.add(decodedMessage);
+
+            if (type == 'leader') {
+              _initNotification(decodedMessage, id);
+            } else if (type == 'pic') {
+              _targetAlarm(decodedMessage, id); 
+            } else if (type == 'andon') {
+              _checkAndScheduleAlarm(decodedMessage, role);
+            } else if (type == 'delayed_andon') {
+              final roleParts = role?.split('-') ?? [];
+              final roleCode = roleParts.length >= 3 ? roleParts[2] : role;
+              _checkAndScheduleAlarmManajer(decodedMessage, roleCode, role);
+            }
+          } catch (e) {
+            print('Error processing WebSocket message: $e');
+          }
+        },
+        onDone: () {
+          print('WebSocket connection closed');
+          _isConnected = false;
+          Future.delayed(Duration(seconds: 5), _connectWebSocket);
+        },
+        onError: (error) {
+          print('WebSocket error: $error');
+          _isConnected = false;
+        },
+      );
+    } catch (e) {
+      print('Error connecting to WebSocket: $e');
+      _isConnected = false;
+    }
   }
 
   void _initNotification(Map<String, dynamic> message, int? id) {
@@ -459,10 +482,11 @@ class WebSocketService extends GetxService {
   }
 
   void closeConnection() {
-    _channel.sink.close();
+    _channel?.sink.close();
+    _isConnected = false;
   }
 
-  @override
+  @override 
   void onClose() {
     closeConnection();
     super.onClose();

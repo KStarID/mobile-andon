@@ -85,47 +85,93 @@ class AndonHomeController extends GetxController {
       try {
           final scan = await _andonService.andonscanner(call.id);
           if (scan['success'] == true) {
+            Future.delayed(Duration(seconds: 1));
             Get.offAllNamed('/repairing', arguments: {
               'andonId': call.id,
             });
           } else {
-          Get.snackbar(
-            'Error', 
-            'Failed to process Andon scan: ${scan['message']}',
-            snackPosition: SnackPosition.TOP,
-            backgroundColor: Colors.redAccent,
-            colorText: Colors.white,
-            duration: Duration(seconds: 5),
-            isDismissible: true,
-            overlayBlur: 0,
-            overlayColor: Colors.transparent,
-          );
-        }
+            // Menggunakan dialog untuk error
+            await Get.dialog(
+              AlertDialog(
+                title: Row(
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.red),
+                    SizedBox(width: 10),
+                    Text('Error', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+                content: Text(
+                  'Failed to process Andon scan: ${scan['message']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Get.back(),
+                    child: Text('OK', style: TextStyle(fontSize: 16)),
+                  ),
+                ],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+              barrierDismissible: false, // Harus klik OK untuk menutup
+            );
+          }
           
       } catch (e) {
-        Get.snackbar(
-          'Error', 
-          'Failed to process Andon scan: $e',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white,
-          duration: Duration(seconds: 5),
-          isDismissible: true,
-          overlayBlur: 0,
-          overlayColor: Colors.transparent,
+        // Error handling dengan dialog
+        await Get.dialog(
+          AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.red),
+                SizedBox(width: 10),
+                Text('Error', style: TextStyle(color: Colors.red)),
+              ],
+            ),
+            content: Text(
+              'Failed to process Andon scan: $e',
+              style: TextStyle(fontSize: 16),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(),
+                child: Text('OK', style: TextStyle(fontSize: 16)),
+              ),
+            ],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+          ),
+          barrierDismissible: false,
         );
       }
     } else {
-      Get.snackbar(
-        'Error', 
-        'Invalid QR code for this Andon call',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-        duration: Duration(seconds: 3),
-        isDismissible: true,
-        overlayBlur: 0,
-        overlayColor: Colors.transparent,
+      // Invalid QR code dialog
+      await Get.dialog(
+        AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.qr_code, color: Colors.red),
+              SizedBox(width: 10),
+              Text('Invalid QR Code', style: TextStyle(color: Colors.red)),
+            ],
+          ),
+          content: Text(
+            'Please scan the correct QR code.',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: Text('OK', style: TextStyle(fontSize: 16)),
+            ),
+          ],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+        ),
+        barrierDismissible: false,
       );
     }
   }
@@ -137,7 +183,7 @@ class AndonHomeController extends GetxController {
       assetAudioPath: 'assets/alarm.wav',
       loopAudio: true,
       vibrate: true,
-      volume: 0,
+      volume: 1,
       fadeDuration: 0.0,
       warningNotificationOnKill: true,
       androidFullScreenIntent: true,
@@ -174,7 +220,6 @@ class AndonHomeController extends GetxController {
   Future<void> updateMessageStatus(String sopNumber, String status) async {
     try {
       final index = messages.indexWhere((message) => message['sop_number'] == sopNumber);
-      print('ini coba index $index');
       if (index != -1) {
         messages[index]['status'] = status;
         update();
