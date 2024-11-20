@@ -62,7 +62,7 @@ class HomeView extends GetView<HomeController> {
                           SizedBox(height: 8),
                           Text(
                             'Your Role: ${controller.role.value.stringValue.toUpperCase()}',
-                            style: TextStyle(fontSize: 16, color: Colors.grey[800]),
+                            style: TextStyle(fontSize: 18, color: Colors.grey[800]),
                           ),
                         ],
                       ),

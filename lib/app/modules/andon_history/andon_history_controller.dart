@@ -106,7 +106,6 @@ class AndonHistoryController extends GetxController {
       final fetchedAndonCallsAll = await _andonService.getAndonsAllCompleted();
       andonCalls.assignAll(fetchedAndonCallsAll);
       applyDateFilter();
-      print('fetchedAndonCallsAll: $fetchedAndonCallsAll');
     } catch (e) {
       Get.snackbar('Error', 'Failed to fetch andon calls. Please try again.',
         snackPosition: SnackPosition.TOP,

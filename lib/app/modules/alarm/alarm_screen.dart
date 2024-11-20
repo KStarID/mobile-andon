@@ -83,7 +83,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
                     '${widget.alarmSettings.notificationSettings.body} need Attention!',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 30,
                       color: Colors.black,
                     ),
                   ),

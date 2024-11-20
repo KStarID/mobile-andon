@@ -72,7 +72,6 @@ class RepairingController extends GetxController {
     try {
       if (_homeController.isInitialized) {
         canAssess.value = _homeController.canAssess;
-        print('canAssess updated to: ${canAssess.value}');
       } else {
         print('HomeController not initialized yet');
       }

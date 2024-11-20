@@ -54,7 +54,6 @@ class AndonHomeController extends GetxController {
       final calls = await _andonService.getAndonsByRoleActive();
       final currentUserId = Get.put(ApiService()).getUserId();
       andonCalls.assignAll(calls.where((call) {
-        print(calls);
         if (call.pic != null) {
           return call.pic?.id == currentUserId;
         }
@@ -189,7 +188,7 @@ class AndonHomeController extends GetxController {
       androidFullScreenIntent: true,
       notificationSettings: NotificationSettings(
         title: 'Andon System Alert!',
-        body: 'New task assigned to ${Get.find<ApiService>().getRole()} : ${message['line']} - ${message['sop_number']}',
+        body: 'New task : Line ${message['line']} - ${message['sop_number']}',
         icon: 'assets/icon/oppo-logo.png',
       ),
     );

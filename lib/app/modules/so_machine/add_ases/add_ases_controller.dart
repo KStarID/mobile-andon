@@ -200,7 +200,6 @@ class AddAsesController extends GetxController {
           'id': machineCodeAssetController.text,
           'name': machineName.text,
         };
-        print('ini machineData: $machineData');
         
         final newMachine = await _apiService.createMachine(machineData);
         if (newMachine == null) {

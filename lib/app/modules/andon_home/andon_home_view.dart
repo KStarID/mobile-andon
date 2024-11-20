@@ -114,10 +114,6 @@ class AndonHomeView extends GetView<AndonHomeController> {
               'Area: ${call.area.name}',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-            subtitle: Text(
-              'Sub Area: ${call.subarea.name}',
-              style: TextStyle(fontSize: 18),
-            ),
             leading: CircleAvatar(
               backgroundColor: statusColor,
               radius: 30,
@@ -140,6 +136,7 @@ class AndonHomeView extends GetView<AndonHomeController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                _buildInfoRow('Sub Area', call.subarea.name),
                 _buildInfoRow('Model', call.model.name),
                 _buildInfoRow('SOP', call.sop.name),
                 _buildInfoRow('Date', _formatDate(call.startTime)),

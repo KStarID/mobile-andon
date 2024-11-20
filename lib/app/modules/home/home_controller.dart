@@ -95,7 +95,6 @@ class HomeController extends GetxController {
       await fetchMTTRTarget();
     } catch (e) {
       print('Error fetching MTTR data: $e');
-      Get.snackbar('Error', 'Gagal memuat data MTTR');
     }
   }
 
@@ -146,7 +145,6 @@ class HomeController extends GetxController {
       await fetchMTBFTarget();
     } catch (e) {
       print('Error fetching MTBF data: $e');
-      Get.snackbar('Error', 'Gagal memuat data MTBF');
     }
   }
 
@@ -250,12 +248,6 @@ class HomeController extends GetxController {
       
     } catch (e) {
       print('Error fetching machine status data: $e');
-      Get.snackbar('Error', 'Gagal memuat data status mesin',
-        duration: Duration(seconds: 3),
-        isDismissible: true,
-        overlayBlur: 0,
-        overlayColor: Colors.transparent,
-      );
     }
   }
   
