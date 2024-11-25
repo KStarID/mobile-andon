@@ -449,26 +449,48 @@ class AddAsesView extends GetView<AddAsesController> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        ElevatedButton.icon(
-          onPressed: controller.addAssessment,
-          icon: Icon(Icons.add, color: Colors.white),
-          label: Text('Add Assessment', style: TextStyle(color: Colors.white)),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary400,
-            padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: ElevatedButton.icon(
+              onPressed: controller.addAssessment,
+              icon: Icon(Icons.add, color: Colors.white),
+              label: Text(
+                'Add', 
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                )
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary400,
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              ),
+            ),
           ),
         ),
-        ElevatedButton.icon(
-          onPressed: controller.clearForm,
-          icon: Icon(Icons.clear, color: AppColors.primary400),
-          label: Text('Clear Form', style: TextStyle(color: AppColors.primary400)),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
-              side: BorderSide(color: AppColors.primary400),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: ElevatedButton.icon(
+              onPressed: controller.clearForm,
+              icon: Icon(Icons.clear, color: AppColors.primary400),
+              label: Text(
+                'Clear', 
+                style: TextStyle(
+                  color: AppColors.primary400,
+                  fontSize: 16,
+                )
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  side: BorderSide(color: AppColors.primary400),
+                ),
+              ),
             ),
           ),
         ),
