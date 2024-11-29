@@ -293,6 +293,28 @@ class HomeController extends GetxController {
       fetchDowntimeTarget(),
     ]);
   }
+
+  Future<void> refreshAllData() async {
+    try {
+      await Future.wait([
+        loadUserData(),
+        fetchMTTRData(),
+        fetchMTBFData(),
+        fetchDowntimeData(),
+        fetchMachineStatusData(),
+        fetchTargets(),
+      ]);
+    } catch (e) {
+      print('Error refreshing data: $e');
+      Get.snackbar(
+        'Error', 
+        'Gagal memperbarui data',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+      );
+    }
+  }
 }
 
 class ChartData {

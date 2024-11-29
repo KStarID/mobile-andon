@@ -145,11 +145,12 @@ class AsesmentView extends GetView<AsesmentController> {
     return RefreshIndicator(
       onRefresh: () async {
         await controller.fetchAssessments();
-        return Future<void>.value();
       },
       child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
+        physics: AlwaysScrollableScrollPhysics(),
         child: SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
+          scrollDirection: Axis.horizontal,
           child: Card(
             margin: EdgeInsets.all(16),
             elevation: 4,

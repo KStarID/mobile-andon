@@ -28,56 +28,62 @@ class HomeView extends GetView<HomeController> {
         ],
       ),
       body: Obx(() {
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [AppColors.primary400, Colors.white],
+        return RefreshIndicator(
+          onRefresh: () async {
+            await controller.refreshAllData();
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [AppColors.primary400, Colors.white],
+              ),
             ),
-          ),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                    child: Container(
-                      padding: const EdgeInsets.all(16.0),
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            'Welcome,',
-                            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                          ),
-                          Text(
-                            controller.name.value?.toUpperCase() ?? "User",
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28, color: AppColors.primary400),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Your Role: ${controller.role.value.stringValue.toUpperCase()}',
-                            style: TextStyle(fontSize: 18, color: Colors.grey[800]),
-                          ),
-                        ],
+            child: SingleChildScrollView(
+              physics: AlwaysScrollableScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      child: Container(
+                        padding: const EdgeInsets.all(16.0),
+                        width: double.infinity,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              'Welcome,',
+                              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                            ),
+                            Text(
+                              controller.name.value?.toUpperCase() ?? "User",
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28, color: AppColors.primary400),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Your Role: ${controller.role.value.stringValue.toUpperCase()}',
+                              style: TextStyle(fontSize: 18, color: Colors.grey[800]),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 24),
-                  _buildDowntimeCard(),
-                  SizedBox(height: 24),
-                  _buildMachinePieCard(),
-                  SizedBox(height: 24),
-                  _buildMTBFCard(),
-                  SizedBox(height: 24),
-                  _buildMTTRCard(),
-                  SizedBox(height: 24),
-                ],
+                    SizedBox(height: 24),
+                    _buildDowntimeCard(),
+                    SizedBox(height: 24),
+                    _buildMachinePieCard(),
+                    SizedBox(height: 24),
+                    _buildMTBFCard(),
+                    SizedBox(height: 24),
+                    _buildMTTRCard(),
+                    SizedBox(height: 24),
+                  ],
+                ),
               ),
             ),
           ),

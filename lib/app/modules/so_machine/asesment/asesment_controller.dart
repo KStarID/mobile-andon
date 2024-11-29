@@ -21,8 +21,6 @@ class AsesmentController extends GetxController {
   final currentPage = 1.obs;
   final totalPages = 1.obs;
 
-  Timer? _timer;
-
   List<Assessment> get paginatedAssessments {
     final startIndex = (currentPage.value - 1) * itemsPerPage;
     final endIndex = startIndex + itemsPerPage;
@@ -55,19 +53,11 @@ class AsesmentController extends GetxController {
     super.onInit();
     _initializeApiService();
     fetchAssessments();
-    _startPeriodicRefresh();
   }
 
   @override
   void onClose() {
-    _timer?.cancel();
     super.onClose();
-  }
-
-  void _startPeriodicRefresh() {
-    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
-      fetchAssessments();
-    });
   }
 
   void _initializeApiService() {
@@ -94,7 +84,6 @@ class AsesmentController extends GetxController {
   Future<void> fetchAssessments() async {
     try {
       isLoading(true);
-      await Future.delayed(Duration(seconds: 1));
       final fetchedAssessments = await _apiService.getAssessments();
       final latestAssessments = groupAndGetLatestAssessments(fetchedAssessments!);
       assessments.assignAll(latestAssessments);
