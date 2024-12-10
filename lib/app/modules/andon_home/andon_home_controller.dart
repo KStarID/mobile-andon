@@ -84,7 +84,7 @@ class AndonHomeController extends GetxController {
       try {
           final scan = await _andonService.andonscanner(call.id);
           if (scan['success'] == true) {
-            Future.delayed(Duration(seconds: 1));
+            await Future.delayed(Duration(seconds: 1));
             Get.offAllNamed('/repairing', arguments: {
               'andonId': call.id,
             });

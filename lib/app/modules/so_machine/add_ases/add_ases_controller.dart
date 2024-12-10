@@ -62,7 +62,7 @@ class AddAsesController extends GetxController {
       subAreas.assignAll(fetchedSubAreas);
     } catch (e) {
       print('Error fetching sub areas: $e');
-      Get.snackbar('Error', 'Failed to fetch sub area data',
+      Get.snackbar('Error', 'Failed to fetch sub area data: $e',
       snackPosition: SnackPosition.TOP,
       backgroundColor: Colors.redAccent,
       colorText: Colors.white,
@@ -76,7 +76,7 @@ class AddAsesController extends GetxController {
       models.assignAll(fetchedModels);
     } catch (e) {
       print('Error fetching models: $e');
-      Get.snackbar('Error', 'Failed to fetch model data',
+      Get.snackbar('Error', 'Failed to fetch model data: $e',
       snackPosition: SnackPosition.TOP,
       backgroundColor: Colors.redAccent,
       colorText: Colors.white,

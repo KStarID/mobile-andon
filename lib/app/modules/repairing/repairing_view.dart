@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/models/andon_model.dart';
@@ -107,21 +108,24 @@ class RepairingView extends GetView<RepairingController> {
 
   Widget _buildFormSection() {
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Repairing Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary400)),
             Divider(color: AppColors.primary400),
             SizedBox(height: 16),
-            _buildDropdown(
+            _buildSearchableDropdown<String>(
               label: 'Shift',
-              value: controller.selectedShift,
+              searchHint: 'Search Shift',
               items: controller.shifts,
+              selectedValue: controller.selectedShift,
               onChanged: controller.updateShift,
+              itemBuilder: (shift) => Text(shift),
+              displayStringForOption: (shift) => shift,
               isRequired: true,
             ),
             SizedBox(height: 16),
@@ -186,53 +190,6 @@ class RepairingView extends GetView<RepairingController> {
     );
   }
 
-  Widget _buildDropdown({
-    required String label,
-    required Rx<String?> value,
-    required List<String> items,
-    required Function(String?) onChanged,
-    bool isRequired = true,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: label,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary400),
-              ),
-              if (isRequired)
-                TextSpan(
-                  text: ' *',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
-                ),
-            ],
-          ),
-        ),
-        SizedBox(height: 8),
-        Obx(() => Container(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.primary400),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: value.value,
-              isExpanded: true,
-              icon: Icon(Icons.arrow_drop_down, color: AppColors.primary400),
-              items: items.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
-              onChanged: onChanged,
-            ),
-          ),
-        )),
-      ],
-    );
-  }
-
   Widget _buildSearchableDropdown<T>({
     required String label,
     required String searchHint,
@@ -251,12 +208,12 @@ class RepairingView extends GetView<RepairingController> {
             children: [
               TextSpan(
                 text: label,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.primary400),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary400),
               ),
               if (isRequired)
                 TextSpan(
                   text: ' *',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
                 ),
             ],
           ),

@@ -9,17 +9,17 @@ import '../data/models/andon_model.dart';
 import '../data/models/assessment_model.dart';
 import '../modules/andon_home/andon_home_controller.dart';
 
-final String baseUrl = 'http://10.0.2.2:5000/api/v1'; // 10.0.2.2 untuk localhost pada emulator Android
+// final String baseUrl = 'http://10.0.2.2:5000/api/v1'; // 10.0.2.2 untuk localhost pada emulator Android
 // final String baseUrl = 'http://192.168.0.100:5000/api/v1';
-// final String baseUrl = 'http://10.106.88.254:5000/api/v1';
+final String baseUrl = 'http://10.106.88.254:5000/api/v1';
 
-final String baseUrl2 = 'http://10.0.2.2:8080/api/v1';
+// final String baseUrl2 = 'http://10.0.2.2:8080/api/v1';
 // final String baseUrl2 = 'http://192.168.0.100:8080/api/v1';
-// final String baseUrl2 = 'http://10.106.88.254:8080/api/v1';
+final String baseUrl2 = 'http://10.106.88.254:8080/api/v1';
 
-final websocketUrl = 'ws://10.0.2.2:5001/api/v1/ws';
+// final websocketUrl = 'ws://10.0.2.2:5001/api/v1/ws';
 // final websocketUrl = 'ws://192.168.0.100:5001/api/v1/ws';
-// final websocketUrl = 'ws://10.106.88.254:5001/api/v1/ws';
+final websocketUrl = 'ws://10.106.88.254:5001/api/v1/ws';
 
 class AuthService extends GetxService {
 
@@ -243,7 +243,7 @@ class ApiService extends GetxService {
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       if (jsonResponse['success'] == true) {
-        final List<dynamic> subAreaData = jsonResponse['data'][0];
+        final List<dynamic> subAreaData = jsonResponse['data'];
         return subAreaData.map((data) => SubArea.fromJson(data)).toList();
       } else {
         throw Exception('API response indicates failure');
@@ -261,7 +261,7 @@ class ApiService extends GetxService {
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       if (jsonResponse['success'] == true) {
-        final List<dynamic> modelData = jsonResponse['data'][0];
+        final List<dynamic> modelData = jsonResponse['data'];
         return modelData.map((data) => Model.fromJson(data)).toList();
       } else {
         throw Exception('API response indicates failure');

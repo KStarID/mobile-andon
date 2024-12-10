@@ -12,10 +12,12 @@ class RepairingController extends GetxController {
   final leaders = <Leader>[].obs;
   final filteredLeaders = <Leader>[].obs;
   final selectedShift = Rx<String?>(null);
-  final shifts = ['Day', 'Night'];
+  final shifts = <String>[].obs;
+  final filteredShifts = <String>[].obs;
   final role = Rx<String?>(null);
   final canAssess = false.obs;
   late HomeController _homeController;
+  final shiftSearchController = TextEditingController();
   final leaderSearchController = TextEditingController();
   final problemController = TextEditingController();
   final solutionController = TextEditingController();
@@ -40,7 +42,7 @@ class RepairingController extends GetxController {
       prefs = await SharedPreferences.getInstance();
       await getRole();
       await fetchLeaders();
-      
+      await fetchShifts();
       // Update canAssess setelah data dimuat
       updateCanAssess();
       
@@ -103,6 +105,11 @@ class RepairingController extends GetxController {
     }
   }
 
+  Future<void> fetchShifts() async {
+    final fetchedShifts = ['Day', 'Night'];
+    shifts.assignAll(fetchedShifts);
+  }
+
   void updateLeader(Leader? value) {
     selectedLeader.value = value;
     saveData();
@@ -118,6 +125,14 @@ class RepairingController extends GetxController {
       filteredLeaders.assignAll(leaders);
     } else {
       filteredLeaders.assignAll(leaders.where((leader) => leader.name.toLowerCase().contains(query.toLowerCase())).toList());
+    }
+  }
+
+  void filterShifts(String query) {
+    if (query.isEmpty) {
+      filteredShifts.assignAll(shifts);
+    } else {
+      filteredShifts.assignAll(shifts.where((shift) => shift.toLowerCase().contains(query.toLowerCase())).toList());
     }
   }
 
@@ -138,7 +153,7 @@ class RepairingController extends GetxController {
     }
 
     final repairingData = {
-      "shift": selectedShift.value!.toLowerCase(),
+      "shift": selectedShift.value!,
       "leader_id": selectedLeader.value!.id,
       "problem": problemController.text,
       "solution": solutionController.text,
@@ -165,7 +180,7 @@ class RepairingController extends GetxController {
   }
 
   void saveData() {
-    prefs.setString('shiftId', selectedShift.value ?? '');
+    prefs.setString('shiftId', selectedShift.value ?? 'Day');
     prefs.setInt('leaderId', selectedLeader.value?.id ?? 0);
     prefs.setString('problem', problemController.text);
     prefs.setString('solution', solutionController.text);
@@ -173,7 +188,7 @@ class RepairingController extends GetxController {
   }
 
   void loadSavedData() {
-    selectedShift.value = prefs.getString('shiftId');
+    selectedShift.value = prefs.getString('shiftId') ?? 'Day';
     selectedLeader.value = leaders.firstWhereOrNull((l) => l.id == prefs.getInt('leaderId'));
     problemController.text = prefs.getString('problem') ?? '';
     solutionController.text = prefs.getString('solution') ?? '';
