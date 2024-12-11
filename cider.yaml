@@ -1,0 +1,2 @@
+version_template: '$major.$minor.$patch+$build'
+preserve_build: true
