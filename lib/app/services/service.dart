@@ -9,27 +9,26 @@ import '../data/models/andon_model.dart';
 import '../data/models/assessment_model.dart';
 import '../modules/andon_home/andon_home_controller.dart';
 
-// final String baseUrl = 'http://10.0.2.2:5000/api/v1'; // 10.0.2.2 untuk localhost pada emulator Android
+final String baseUrl = 'http://10.0.2.2:5000/api/v1'; // 10.0.2.2 untuk localhost pada emulator Android
 // final String baseUrl = 'http://192.168.0.100:5000/api/v1';
-final String baseUrl = 'http://10.106.88.254:5000/api/v1';
+// final String baseUrl = 'http://10.106.88.254:5000/api/v1';
 
-// final String baseUrl2 = 'http://10.0.2.2:8080/api/v1';
+final String baseUrl2 = 'http://10.0.2.2:8080/api/v1';
 // final String baseUrl2 = 'http://192.168.0.100:8080/api/v1';
-final String baseUrl2 = 'http://10.106.88.254:8080/api/v1';
+// final String baseUrl2 = 'http://10.106.88.254:8080/api/v1';
 
-// final websocketUrl = 'ws://10.0.2.2:5001/api/v1/ws';
+final websocketUrl = 'ws://10.0.2.2:5001/api/v1/ws';
 // final websocketUrl = 'ws://192.168.0.100:5001/api/v1/ws';
-final websocketUrl = 'ws://10.106.88.254:5001/api/v1/ws';
+// final websocketUrl = 'ws://10.106.88.254:5001/api/v1/ws';
 
 class AuthService extends GetxService {
-
   String? _accessToken;
   final isLoading = false.obs;
 
   Future<Map<String, dynamic>> login(String username, String password) async {
     try {
       isLoading.value = true;
-      
+
       final response = await http.post(
         Uri.parse('$baseUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},
@@ -76,32 +75,32 @@ class AuthService extends GetxService {
   }
 
   Future<void> logout() async {
-  try {
-    await http.post(
-      Uri.parse('$baseUrl/auth/logout'),
-    );
-    Get.snackbar(
-      'Logout', 
-      'Logout Successfully',
-      backgroundColor: Colors.green[400],
-      colorText: Colors.white,
-      icon: Icon(Icons.check_circle, color: Colors.white),
-      margin: EdgeInsets.all(16),
-      borderRadius: 8,
-      duration: Duration(seconds: 3),
-    );
-  } catch (e) {
-    Get.snackbar(
-      'Error', 
-      'Failed to logout. Please try again.',
-      backgroundColor: Colors.redAccent,
-      colorText: Colors.white,
-      icon: Icon(Icons.error_outline, color: Colors.white),
-      margin: EdgeInsets.all(16),
-      borderRadius: 8,
-      duration: Duration(seconds: 3),
-    );
-  }
+    try {
+      await http.post(
+        Uri.parse('$baseUrl/auth/logout'),
+      );
+      Get.snackbar(
+        'Logout',
+        'Logout Successfully',
+        backgroundColor: Colors.green[400],
+        colorText: Colors.white,
+        icon: Icon(Icons.check_circle, color: Colors.white),
+        margin: EdgeInsets.all(16),
+        borderRadius: 8,
+        duration: Duration(seconds: 3),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to logout. Please try again.',
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        icon: Icon(Icons.error_outline, color: Colors.white),
+        margin: EdgeInsets.all(16),
+        borderRadius: 8,
+        duration: Duration(seconds: 3),
+      );
+    }
   }
 }
 
@@ -117,7 +116,7 @@ class ApiService extends GetxService {
       'Authorization': 'Bearer ${_authService.getAccessToken()}',
     };
   }
-  
+
   Future<String?> getCurrentUser() async {
     try {
       final response = await http.get(
@@ -139,7 +138,8 @@ class ApiService extends GetxService {
           throw Exception('Respons API menunjukkan kegagalan');
         }
       } else {
-        throw Exception('Gagal mendapatkan pengguna saat ini. Kode status: ${response.statusCode}');
+        throw Exception(
+            'Gagal mendapatkan pengguna saat ini. Kode status: ${response.statusCode}');
       }
     } catch (e) {
       print('Kesalahan dalam getCurrentUser: $e');
@@ -185,7 +185,9 @@ class ApiService extends GetxService {
           final List<dynamic> assessmentDataNested = jsonResponse['data'];
           if (assessmentDataNested.isNotEmpty) {
             final List<dynamic> assessmentData = assessmentDataNested;
-            return assessmentData.map((data) => Assessment.fromJson(data)).toList();
+            return assessmentData
+                .map((data) => Assessment.fromJson(data))
+                .toList();
           } else {
             throw Exception('Unexpected data structure in API response');
           }
@@ -193,7 +195,8 @@ class ApiService extends GetxService {
           throw Exception('API response indicates failure');
         }
       } else {
-        throw Exception('Failed to load assessments. Status code: ${response.statusCode}');
+        throw Exception(
+            'Failed to load assessments. Status code: ${response.statusCode}');
       }
     } catch (e) {
       print('Error in getAssessments: $e');
@@ -201,7 +204,8 @@ class ApiService extends GetxService {
     }
   }
 
-  Future<Assessment?> createAssessment(Map<String, dynamic> assessmentData) async {
+  Future<Assessment?> createAssessment(
+      Map<String, dynamic> assessmentData) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/assessments'),
@@ -226,7 +230,8 @@ class ApiService extends GetxService {
           return null;
         }
       } else {
-        print('Gagal membuat assessment. Kode status: ${response.statusCode}, Body: ${response.body}');
+        print(
+            'Gagal membuat assessment. Kode status: ${response.statusCode}, Body: ${response.body}');
         return null;
       }
     } catch (e) {
@@ -312,14 +317,15 @@ class ApiService extends GetxService {
         Uri.parse('$baseUrl/machines/$machineCode'),
         headers: _getHeaders(),
       );
-      
+
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
         if (jsonResponse['success'] == true && jsonResponse['data'] != null) {
           return Machine(
             id: jsonResponse['data']['id'] ?? '',
             name: jsonResponse['data']['name'] ?? '',
-            status: jsonResponse['data']['status']?.toString().toLowerCase() ?? 'ok',
+            status: jsonResponse['data']['status']?.toString().toLowerCase() ??
+                'ok',
           );
         }
       }
@@ -330,7 +336,8 @@ class ApiService extends GetxService {
     }
   }
 
-  Future<Assessment> updateAssessment(int id, Map<String, dynamic> assessmentData) async {
+  Future<Assessment> updateAssessment(
+      int id, Map<String, dynamic> assessmentData) async {
     try {
       final response = await http.put(
         Uri.parse('$baseUrl/assessments/$id'),
@@ -343,10 +350,12 @@ class ApiService extends GetxService {
         if (jsonResponse['success'] == true) {
           return Assessment.fromJson(jsonResponse['data']);
         } else {
-          throw Exception('API response indicates failure: ${jsonResponse['message']}');
+          throw Exception(
+              'API response indicates failure: ${jsonResponse['message']}');
         }
       } else {
-        throw Exception('Failed to update assessment. Status code: ${response.statusCode}, Body: ${response.body}');
+        throw Exception(
+            'Failed to update assessment. Status code: ${response.statusCode}, Body: ${response.body}');
       }
     } catch (e) {
       print('Error in updateAssessment: $e');
@@ -354,23 +363,27 @@ class ApiService extends GetxService {
     }
   }
 
-  Future<List<Assessment>> getAssessmentHistoryByMachineId(String machineId) async {
+  Future<List<Assessment>> getAssessmentHistoryByMachineId(
+      String machineId) async {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/assessments/history/$machineId'),
         headers: _getHeaders(),
       );
-      
+
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         if (jsonResponse['success'] == true) {
           final List<dynamic> assessmentData = jsonResponse['data'];
-          return assessmentData.map((data) => Assessment.fromJson(data)).toList();
+          return assessmentData
+              .map((data) => Assessment.fromJson(data))
+              .toList();
         } else {
           throw Exception('API response indicates failure');
         }
       } else {
-        throw Exception('Failed to load assessment history. Status code: ${response.statusCode}');
+        throw Exception(
+            'Failed to load assessment history. Status code: ${response.statusCode}');
       }
     } catch (e) {
       print('Error in getAssessmentHistoryByMachineId: $e');
@@ -398,7 +411,7 @@ class WebSocketService extends GetxService {
     try {
       _channel = WebSocketChannel.connect(Uri.parse(websocketUrl));
       _isConnected = true;
-      
+
       _channel?.stream.listen(
         (message) {
           try {
@@ -412,7 +425,7 @@ class WebSocketService extends GetxService {
             if (type == 'leader') {
               _initNotification(decodedMessage, id);
             } else if (type == 'pic') {
-              _targetAlarm(decodedMessage, id); 
+              _targetAlarm(decodedMessage, id);
             } else if (type == 'andon') {
               _checkAndScheduleAlarm(decodedMessage, role);
             } else if (type == 'delayed_andon') {
@@ -464,14 +477,19 @@ class WebSocketService extends GetxService {
     }
   }
 
-  void _checkAndScheduleAlarmManajer(Map<String, dynamic> message, String? roleCode, String? role) {
+  void _checkAndScheduleAlarmManajer(
+      Map<String, dynamic> message, String? roleCode, String? role) {
     final assignedTo = message['assigned_to']?.toString().toLowerCase() ?? '';
     final type = message['type']?.toString().toLowerCase() ?? '';
-    if (role?.toLowerCase() == 'acc-manager-me' && type == 'delayed_andon' && assignedTo == roleCode?.toLowerCase()) {
+    if (role?.toLowerCase() == 'acc-manager-me' &&
+        type == 'delayed_andon' &&
+        assignedTo == roleCode?.toLowerCase()) {
       messages.add(message);
       Get.put(AndonHomeController()).scheduleAlarm(message);
     }
-    if (role?.toLowerCase() == 'acc-manager-pe' && type == 'delayed_andon' && assignedTo == roleCode?.toLowerCase()) {
+    if (role?.toLowerCase() == 'acc-manager-pe' &&
+        type == 'delayed_andon' &&
+        assignedTo == roleCode?.toLowerCase()) {
       messages.add(message);
       Get.put(AndonHomeController()).scheduleAlarm(message);
     }
@@ -482,7 +500,7 @@ class WebSocketService extends GetxService {
     _isConnected = false;
   }
 
-  @override 
+  @override
   void onClose() {
     closeConnection();
     super.onClose();
@@ -505,14 +523,14 @@ class AndonService extends GetxService {
       headers: _getHeaders(),
     );
     if (response.statusCode == 200) {
-        return json.decode(response.body);
-    //     if (jsonResponse['success'] == true) {
-    //       final List<dynamic> andonData = jsonResponse['data'];
-    //       return andonData.map((data) => AndonCall.fromJson(data)).toList();
-    //     } else {
-    //       throw Exception('API menunjukkan kegagalan');
-    //     }
-    // } else {
+      return json.decode(response.body);
+      //     if (jsonResponse['success'] == true) {
+      //       final List<dynamic> andonData = jsonResponse['data'];
+      //       return andonData.map((data) => AndonCall.fromJson(data)).toList();
+      //     } else {
+      //       throw Exception('API menunjukkan kegagalan');
+      //     }
+      // } else {
       // throw Exception('Failed to scan QR code. Status code: ${response.statusCode}');
     }
   }
@@ -551,7 +569,8 @@ class AndonService extends GetxService {
           throw Exception('API menunjukkan kegagalan');
         }
       } else {
-        throw Exception('Gagal memuat data andon. Kode status: ${response.statusCode}');
+        throw Exception(
+            'Gagal memuat data andon. Kode status: ${response.statusCode}');
       }
     } catch (e) {
       print('Error dalam getAndonsByRole: $e');
@@ -575,7 +594,8 @@ class AndonService extends GetxService {
           throw Exception('API menunjukkan kegagalan');
         }
       } else {
-        throw Exception('Gagal memuat data andon. Kode status: ${response.statusCode}');
+        throw Exception(
+            'Gagal memuat data andon. Kode status: ${response.statusCode}');
       }
     } catch (e) {
       print('Error dalam getAndonsByRole: $e');
@@ -584,22 +604,23 @@ class AndonService extends GetxService {
   }
 
   Future<List<AndonCall>> getAndonsAllCompleted() async {
-  try {
+    try {
       final response = await http.get(
         Uri.parse('$baseUrl2/andons/completed'),
         headers: _getHeaders(),
-    );
-    if (response.statusCode == 200) {
-      final jsonResponse = json.decode(response.body);
-      final List<dynamic> andonData = jsonResponse['data'];
-      return andonData.map((data) => AndonCall.fromJson(data)).toList();
-    } else {
-      throw Exception('Failed to load andon history. Status code: ${response.statusCode}');
+      );
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        final List<dynamic> andonData = jsonResponse['data'];
+        return andonData.map((data) => AndonCall.fromJson(data)).toList();
+      } else {
+        throw Exception(
+            'Failed to load andon history. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error in getAndonsAllCompleted: $e');
+      rethrow;
     }
-  } catch (e) {
-    print('Error in getAndonsAllCompleted: $e');
-    rethrow;
-  }
   }
 
   Future<AndonCall> getAndonHistoryByAndonId(String andonId) async {
@@ -617,7 +638,8 @@ class AndonService extends GetxService {
           throw Exception('API response indicates failure');
         }
       } else {
-        throw Exception('Failed to load andon history. Status code: ${response.statusCode}');
+        throw Exception(
+            'Failed to load andon history. Status code: ${response.statusCode}');
       }
     } catch (e) {
       print('Error in getAndonHistoryByAndonId: $e');
@@ -635,27 +657,33 @@ class AndonService extends GetxService {
       final List<dynamic> andonData = jsonResponse['data'];
       return andonData.map((data) => AndonCall.fromJson(data)).toList();
     } else {
-      throw Exception('Failed to load andon history. Status code: ${response.statusCode}');
+      throw Exception(
+          'Failed to load andon history. Status code: ${response.statusCode}');
     }
   }
 
-  Future<void> addRepairing(Map<String, dynamic> repairingData, int andonId) async {
+  Future<void> addRepairing(
+      Map<String, dynamic> repairingData, int andonId) async {
     final response = await http.put(
       Uri.parse('$baseUrl2/andons/$andonId/submit-submission'),
       headers: _getHeaders(),
       body: json.encode(repairingData),
     );
     if (response.statusCode == 200) {
-      Get.snackbar('Success', 'Repairing added successfully',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
+      Get.snackbar(
+        'Success',
+        'Repairing added successfully',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
       );
     } else {
-      Get.snackbar('Error', 'Failed to add repairing',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: Colors.redAccent,
-      colorText: Colors.white,
+      Get.snackbar(
+        'Error',
+        'Failed to add repairing',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
       );
     }
   }
@@ -667,16 +695,20 @@ class AndonService extends GetxService {
       body: json.encode({'status': status}),
     );
     if (response.statusCode == 200) {
-      Get.snackbar('Success', 'Status updated successfully',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
+      Get.snackbar(
+        'Success',
+        'Status updated successfully',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
       );
     } else {
-      Get.snackbar('Error', 'Failed to update status',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: Colors.redAccent,
-      colorText: Colors.white,
+      Get.snackbar(
+        'Error',
+        'Failed to update status',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
       );
     }
   }
@@ -695,16 +727,18 @@ class AndonService extends GetxService {
         throw Exception('API response indicates failure');
       }
     } else {
-      throw Exception('Failed to load andon history. Status code: ${response.statusCode}');
+      throw Exception(
+          'Failed to load andon history. Status code: ${response.statusCode}');
     }
   }
 
-  Future<List<Map<String, dynamic>>> getMTTRData(String year, {String? month}) async {
+  Future<List<Map<String, dynamic>>> getMTTRData(String year,
+      {String? month}) async {
     try {
-      final url = month != null 
+      final url = month != null
           ? '$baseUrl2/metrics/mttr?year=$year&month=$month'
           : '$baseUrl2/metrics/mttr?year=$year';
-      
+
       final response = await http.get(
         Uri.parse(url),
         headers: _getHeaders(),
@@ -713,44 +747,45 @@ class AndonService extends GetxService {
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         if (jsonResponse['success'] == true) {
-          final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(jsonResponse['data']);
-          
+          final List<Map<String, dynamic>> data =
+              List<Map<String, dynamic>>.from(jsonResponse['data']);
+
           // Jika mode tahunan, pastikan ada 12 periode
           if (month == null) {
             final Map<String, dynamic> monthlyData = {};
             for (var item in data) {
               monthlyData[item['period'].toString()] = item;
             }
-            
+
             // Isi bulan yang kosong dengan nilai 0
             final List<Map<String, dynamic>> completeData = [];
             for (int i = 1; i <= 12; i++) {
               final period = i.toString();
-              completeData.add(monthlyData[period] ?? {
-                'period': period,
-                'mttr': '0'
-              });
+              completeData
+                  .add(monthlyData[period] ?? {'period': period, 'mttr': '0'});
             }
             return completeData;
           }
-          
+
           return data;
         }
         throw Exception('API menunjukkan kegagalan');
       }
-      throw Exception('Gagal memuat data MTTR. Kode status: ${response.statusCode}');
+      throw Exception(
+          'Gagal memuat data MTTR. Kode status: ${response.statusCode}');
     } catch (e) {
       print('Error dalam getMTTRData: $e');
       rethrow;
     }
   }
 
-  Future<List<Map<String, dynamic>>> getMTBFData(String year, {String? month}) async {
+  Future<List<Map<String, dynamic>>> getMTBFData(String year,
+      {String? month}) async {
     try {
-      final url = month != null 
+      final url = month != null
           ? '$baseUrl2/metrics/mtbf?year=$year&month=$month'
           : '$baseUrl2/metrics/mtbf?year=$year';
-      
+
       final response = await http.get(
         Uri.parse(url),
         headers: _getHeaders(),
@@ -759,44 +794,45 @@ class AndonService extends GetxService {
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         if (jsonResponse['success'] == true) {
-          final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(jsonResponse['data']);
-          
+          final List<Map<String, dynamic>> data =
+              List<Map<String, dynamic>>.from(jsonResponse['data']);
+
           // Jika mode tahunan, pastikan ada 12 periode
           if (month == null) {
             final Map<String, dynamic> monthlyData = {};
             for (var item in data) {
               monthlyData[item['period'].toString()] = item;
             }
-            
+
             // Isi bulan yang kosong dengan nilai 0
             final List<Map<String, dynamic>> completeData = [];
             for (int i = 1; i <= 12; i++) {
               final period = i.toString();
-              completeData.add(monthlyData[period] ?? {
-                'period': period,
-                'mtbf': '0'
-              });
+              completeData
+                  .add(monthlyData[period] ?? {'period': period, 'mtbf': '0'});
             }
             return completeData;
           }
-          
+
           return data;
         }
         throw Exception('API menunjukkan kegagalan');
       }
-      throw Exception('Gagal memuat data MTBF. Kode status: ${response.statusCode}');
+      throw Exception(
+          'Gagal memuat data MTBF. Kode status: ${response.statusCode}');
     } catch (e) {
       print('Error dalam getMTBFData: $e');
       rethrow;
     }
   }
 
-  Future<List<Map<String, dynamic>>> getDowntimeData(String year, {String? month}) async {
+  Future<List<Map<String, dynamic>>> getDowntimeData(String year,
+      {String? month}) async {
     try {
-      final url = month != null 
+      final url = month != null
           ? '$baseUrl2/metrics/downtime?year=$year&month=$month'
           : '$baseUrl2/metrics/downtime?year=$year';
-      
+
       final response = await http.get(
         Uri.parse(url),
         headers: _getHeaders(),
@@ -805,32 +841,32 @@ class AndonService extends GetxService {
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
         if (jsonResponse['success'] == true) {
-          final List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(jsonResponse['data']);
-          
+          final List<Map<String, dynamic>> data =
+              List<Map<String, dynamic>>.from(jsonResponse['data']);
+
           // Jika mode tahunan, pastikan ada 12 periode
           if (month == null) {
             final Map<String, dynamic> monthlyData = {};
             for (var item in data) {
               monthlyData[item['period'].toString()] = item;
             }
-            
+
             // Isi bulan yang kosong dengan nilai 0
             final List<Map<String, dynamic>> completeData = [];
             for (int i = 1; i <= 12; i++) {
               final period = i.toString();
-              completeData.add(monthlyData[period] ?? {
-                'period': period,
-                'downtime': '0'
-              });
+              completeData.add(
+                  monthlyData[period] ?? {'period': period, 'downtime': '0'});
             }
             return completeData;
           }
-          
+
           return data;
         }
         throw Exception('API menunjukkan kegagalan');
       }
-      throw Exception('Gagal memuat data downtime. Kode status: ${response.statusCode}');
+      throw Exception(
+          'Gagal memuat data downtime. Kode status: ${response.statusCode}');
     } catch (e) {
       print('Error dalam getDowntimeData: $e');
       rethrow;
@@ -852,7 +888,8 @@ class AndonService extends GetxService {
           throw Exception('API menunjukkan kegagalan');
         }
       } else {
-        throw Exception('Gagal memuat data machine status. Kode status: ${response.statusCode}');
+        throw Exception(
+            'Gagal memuat data machine status. Kode status: ${response.statusCode}');
       }
     } catch (e) {
       print('Error dalam getMachineStatus: $e');
@@ -860,12 +897,13 @@ class AndonService extends GetxService {
     }
   }
 
-  Future<double?> getTarget(String year, {String? month, String? metricType}) async {
+  Future<double?> getTarget(String year,
+      {String? month, String? metricType}) async {
     try {
-      final url = month != null 
+      final url = month != null
           ? '$baseUrl2/targets?year=$year&month=$month&metricType=$metricType'
           : '$baseUrl2/targets?year=$year&metricType=$metricType';
-      
+
       final response = await http.get(
         Uri.parse(url),
         headers: _getHeaders(),
@@ -873,11 +911,12 @@ class AndonService extends GetxService {
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
-        
-        if (jsonResponse['success'] == true && jsonResponse['data'].isNotEmpty) {
+
+        if (jsonResponse['success'] == true &&
+            jsonResponse['data'].isNotEmpty) {
           final targetData = jsonResponse['data'][0];
           final targetValue = targetData['target_value'];
-          
+
           return double.tryParse(targetValue.toString());
         }
       }
@@ -887,6 +926,4 @@ class AndonService extends GetxService {
       return null;
     }
   }
-  
 }
-
